@@ -96,9 +96,9 @@ async function init() {
             u_color1: { value: new THREE.Color(0x00ffff) },
             u_color2: { value: new THREE.Color(0xff00ff) },
             u_color3: { value: new THREE.Color(0xffff00) },
-            u_noiseScale: { value: 1.0 },
+            u_noiseScale: { value: 1.1 },
             u_displacement: { value: 0.5 },
-            u_amplitude: { value: 0.35 },
+            u_amplitude: { value: 0.3 },
             u_planeWidth: { value: planeWidth }
         },
         vertexShader: vertexShader,

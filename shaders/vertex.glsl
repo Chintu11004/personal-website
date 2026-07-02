@@ -41,10 +41,10 @@ float gradientNoise(vec3 p) {
 float fbm(vec3 p) {
     float value = 0.0;
     float amplitude = 0.5;
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 3; i++) {
         value += amplitude * gradientNoise(p);
-        p = p * 2.02 + vec3(100.7, 47.3, 29.1);
-        amplitude *= 0.5;
+        p = p * 2.2 + vec3(100.7, 47.3, 29.1);
+        amplitude *= 0.50;
     }
     return value;
 }
@@ -52,7 +52,7 @@ float fbm(vec3 p) {
 void main() {
     const float TWO_PI = 6.2832;
 
-    // we want to bend the plane along a sin curve
+    // we want to bend the plane along a sin curve and animate with time
     float u = uv.x * TWO_PI - u_time * .5;
     float omega = TWO_PI/u_planeWidth; // we need this becuz chainrule
 
@@ -62,10 +62,28 @@ void main() {
     
     vec3 newNormal = normalize(cross(normal, T));
 
+
     // we add noise now
-    vec3 samplePos = newPosition * u_noiseScale + vec3(47.3, 83.1, 12.7);
-    float height = fbm(samplePos);
-    newPosition += normal * height * u_displacement;
+    // we want to calculate two diff noise patterns at any time. Then lerp between them
+    // in a three second interval
+    float interval = floor(u_time / 3.0);
+    float t = mod(u_time, 3.0) / 3.0; // normalize our t value (our lerp parameter)
+
+    vec3 samplePos = position * u_noiseScale + vec3(47.3, 83.1, 12.7);
+
+    // pattern A
+    vec3 offsetA = vec3(interval * 123.4, interval * 456.7, interval * 789.1);
+    float heightA = fbm(samplePos + offsetA);
+
+    // pattern B
+    ++interval;
+    vec3 offsetB = vec3(interval * 123.4, interval * 456.7, interval * 789.1);
+    float heightB = fbm(samplePos + offsetB);
+
+    // lerp between the two heights
+    float finalHeight = mix(heightA, heightB, smoothstep(0.0, 1.0, t));
+
+    newPosition += normal * finalHeight * u_displacement;
 
     vPosition = newPosition;
     vNormal = normalize(normalMatrix * newNormal);
@@ -74,8 +92,8 @@ void main() {
     vec3 posWorld = (modelMatrix * vec4(newPosition, 1.0)).xyz;
     vec3 normWorld = normalize(mat3(modelMatrix) * newNormal);
 
-    vec3 viewDirection = normalize(posWorld - u_cameraPosition);
-    fresnel = 0.0 + 0.1 * pow(1.0 + dot(normWorld, viewDirection), 3.0);
+    vec3 viewDirection = normalize(-posWorld + vec3(posWorld.x, u_cameraPosition.y, u_cameraPosition.z));
+    fresnel = 0.0 + 0.001 * pow(1.0 - dot(normWorld, viewDirection), 10.0);
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
 }
