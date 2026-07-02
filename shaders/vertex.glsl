@@ -6,6 +6,8 @@ uniform vec2 u_mouse;
 uniform vec3 u_cameraPosition;
 uniform float u_noiseScale;
 uniform float u_displacement;
+uniform float u_amplitude;
+uniform float u_planeWidth;
 
 varying vec3 vPosition;
 varying vec3 vNormal;
@@ -48,19 +50,32 @@ float fbm(vec3 p) {
 }
 
 void main() {
-    vec3 samplePos = vec3(position.xy * u_noiseScale + vec2(47.3, 83.1), 12.7);
+    const float TWO_PI = 6.2832;
+
+    // we want to bend the plane along a sin curve
+    float u = uv.x * TWO_PI;
+    float omega = TWO_PI/u_planeWidth; // we need this becuz chainrule
+
+    vec3 newPosition = vec3(position.x, position.y, u_amplitude * sin(u));
+    vec3 rd = vec3(1, 1, omega * u_amplitude * cos(u));
+    vec3 T = normalize(rd);
+    
+    vec3 newNormal = normalize(cross(normal, T));
+
+    // we add noise now
+    vec3 samplePos = newPosition * u_noiseScale + vec3(47.3, 83.1, 12.7);
     float height = fbm(samplePos);
-    vec3 newPosition = position + normal * height * u_displacement;
+    newPosition += normal * height * u_displacement;
 
     vPosition = newPosition;
-    vNormal = normalize(normalMatrix * normal);
+    vNormal = normalize(normalMatrix * newNormal);
     vUv = uv;
 
     vec3 posWorld = (modelMatrix * vec4(newPosition, 1.0)).xyz;
-    vec3 normWorld = normalize(mat3(modelMatrix) * normal);
+    vec3 normWorld = normalize(mat3(modelMatrix) * newNormal);
 
     vec3 viewDirection = normalize(posWorld - u_cameraPosition);
-    fresnel = 0.00 + 0.1 * pow(1.0 + dot(normWorld, viewDirection), 3.0);
+    fresnel = 0.0 + 0.1 * pow(1.0 + dot(normWorld, viewDirection), 3.0);
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
 }
