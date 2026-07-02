@@ -53,7 +53,7 @@ void main() {
     const float TWO_PI = 6.2832;
 
     // we want to bend the plane along a sin curve
-    float u = uv.x * TWO_PI;
+    float u = uv.x * TWO_PI - u_time * .5;
     float omega = TWO_PI/u_planeWidth; // we need this becuz chainrule
 
     vec3 newPosition = vec3(position.x, position.y, u_amplitude * sin(u));
