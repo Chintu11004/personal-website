@@ -73,10 +73,11 @@ async function init() {
     controls.maxDistance = 10;
 
     // Load shaders
-    let vertexShader, fragmentShader;
+    let vertexShader, fragmentShader, vertexSimpleShader;
     try {
         vertexShader = await fetch('shaders/vertex.glsl').then(res => res.text());
         fragmentShader = await fetch('shaders/fragment.glsl').then(res => res.text());
+        vertexSimpleShader = await fetch('shaders/vertex-simple.glsl').then(res => res.text());
         console.log('Shaders loaded successfully!');
     } catch (error) {
         console.error('Error loading shaders:', error);
@@ -90,13 +91,9 @@ async function init() {
     const shaderMaterial = new THREE.ShaderMaterial({
         uniforms: {
             u_time: { value: 0.0 },
-            u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-            u_mouse: { value: new THREE.Vector2(0.0, 0.0) },
             u_cameraPosition: { value: activeCamera.position },
-            u_color1: { value: new THREE.Color(0x00ffff) },
-            u_color2: { value: new THREE.Color(0xff00ff) },
-            u_color3: { value: new THREE.Color(0xffff00) },
-            u_noiseScale: { value: 1.1 },
+            u_fresnelBias: { value: -0.05 },
+            u_noiseScale: { value: new THREE.Vector3(0.5, 1.2, 1.0) },
             u_displacement: { value: 0.5 },
             u_amplitude: { value: 0.3 },
             u_planeWidth: { value: planeWidth }
@@ -113,6 +110,24 @@ async function init() {
     plane.rotation.x = -Math.PI / 2;
     scene.add(plane);
 
+    // Create sphere with Fresnel shader
+    const sphereShaderMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+            u_cameraPosition: { value: activeCamera.position },
+            u_fresnelBias: { value: 0.04 }
+        },
+        vertexShader: vertexSimpleShader,
+        fragmentShader: fragmentShader,
+        wireframe: false,
+        transparent: true,
+        side: THREE.DoubleSide,
+    });
+
+    const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+    const sphere = new THREE.Mesh(sphereGeometry, sphereShaderMaterial);
+    sphere.position.set(3, 2, 0);
+    scene.add(sphere);
+
     // Add ambient light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
@@ -121,14 +136,6 @@ async function init() {
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
     directionalLight.position.set(5, 5, 5);
     scene.add(directionalLight);
-
-    // Mouse tracking
-    const mouse = new THREE.Vector2();
-    window.addEventListener('mousemove', (event) => {
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        shaderMaterial.uniforms.u_mouse.value = mouse;
-    });
 
     window.addEventListener('keydown', (event) => {
         if (event.repeat) return;
@@ -145,7 +152,6 @@ async function init() {
         updateProjectionMatrices(width, height);
         
         renderer.setSize(width, height);
-        shaderMaterial.uniforms.u_resolution.value.set(width, height);
     });
 
     // Animation loop
@@ -154,11 +160,9 @@ async function init() {
     function animate() {
         requestAnimationFrame(animate);
         
-        // Update time uniform
         shaderMaterial.uniforms.u_time.value = clock.getElapsedTime();
-        
-        // Update camera position uniform
         shaderMaterial.uniforms.u_cameraPosition.value.copy(activeCamera.position);
+        sphereShaderMaterial.uniforms.u_cameraPosition.value.copy(activeCamera.position);
 
         // Update controls
         controls.update();
@@ -169,7 +173,7 @@ async function init() {
 
     animate();
     
-    console.log('Scene initialized with plane only');
+    console.log('Scene initialized with plane and sphere');
 }
 
 // Start the application

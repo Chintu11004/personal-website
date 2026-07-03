@@ -2,7 +2,7 @@
 // This shader transforms vertex positions from model space to screen space
 
 uniform float u_time;
-uniform float u_noiseScale;
+uniform vec3 u_noiseScale;
 uniform float u_displacement;
 uniform float u_amplitude;
 uniform float u_planeWidth;
@@ -97,7 +97,7 @@ NoiseDerivative fbmWithDerivative(vec3 p) {
     float frequency = 1.0;
     
     for (int i = 0; i < 3; i++) {
-        NoiseDerivative octave = gradientNoiseWithDerivative(p * frequency);
+        NoiseDerivative octave = gradientNoiseWithDerivative(p);
         
         result.value += amplitude * octave.value;
         result.derivative += amplitude * frequency * octave.derivative;
@@ -146,13 +146,13 @@ void main() {
     vec3 tangentX = normalize(vec3(
         1.0,
         0.0,
-        omega * u_amplitude * cos(u) + finalDerivative.x * u_displacement * u_noiseScale
+        omega * u_amplitude * cos(u) + finalDerivative.x * u_displacement * u_noiseScale.x
     ));
     
     vec3 tangentY = normalize(vec3(
         0.0,
         1.0,
-        finalDerivative.y * u_displacement * u_noiseScale
+        finalDerivative.y * u_displacement * u_noiseScale.y
     ));
     
     vec3 newNormal = normalize(cross(tangentX, tangentY));
