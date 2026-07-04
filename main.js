@@ -1,64 +1,41 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/OrbitControls.js';
 //import { createSparkleSystem } from './sparkles.js';
 
-// Initialize the scene
+const CAMERA = {
+    frustumSize: 10,
+    position: [-0.09479328005746984, 0.01034594383217302, 2.230247723145003],
+    target: [0, 0, 0],
+    zoom: 6.264789413459975,
+};
+
 async function init() {
-    // Scene setup
     const scene = new THREE.Scene();
-    //scene.background = new THREE.Color(0x1a1a2e);
 
-    const frustumSize = 10;
     const aspect = window.innerWidth / window.innerHeight;
-
-    const perspectiveCamera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
-    perspectiveCamera.position.z = 5;
-
-    const orthographicCamera = new THREE.OrthographicCamera(
-        -frustumSize * aspect / 2,
-        frustumSize * aspect / 2,
-        frustumSize / 2,
-        -frustumSize / 2,
+    const camera = new THREE.OrthographicCamera(
+        -CAMERA.frustumSize * aspect / 2,
+        CAMERA.frustumSize * aspect / 2,
+        CAMERA.frustumSize / 2,
+        -CAMERA.frustumSize / 2,
         0.1,
         1000
     );
-    orthographicCamera.position.copy(perspectiveCamera.position);
+    camera.position.set(...CAMERA.position);
+    camera.lookAt(...CAMERA.target);
+    camera.zoom = CAMERA.zoom;
 
-    let activeCamera = perspectiveCamera;
-    let useOrthographic = false;
-
-    function updateProjectionMatrices(width, height) {
+    function updateProjectionMatrix(width, height) {
         const nextAspect = width / height;
-
-        perspectiveCamera.aspect = nextAspect;
-        perspectiveCamera.updateProjectionMatrix();
-
-        orthographicCamera.left = -frustumSize * nextAspect / 2;
-        orthographicCamera.right = frustumSize * nextAspect / 2;
-        orthographicCamera.top = frustumSize / 2;
-        orthographicCamera.bottom = -frustumSize / 2;
-        orthographicCamera.updateProjectionMatrix();
+        camera.left = -CAMERA.frustumSize * nextAspect / 2;
+        camera.right = CAMERA.frustumSize * nextAspect / 2;
+        camera.top = CAMERA.frustumSize / 2;
+        camera.bottom = -CAMERA.frustumSize / 2;
+        camera.updateProjectionMatrix();
     }
 
-    function toggleCamera() {
-        const previousCamera = activeCamera;
+    updateProjectionMatrix(window.innerWidth, window.innerHeight);
 
-        useOrthographic = !useOrthographic;
-        activeCamera = useOrthographic ? orthographicCamera : perspectiveCamera;
-
-        activeCamera.position.copy(previousCamera.position);
-        activeCamera.quaternion.copy(previousCamera.quaternion);
-
-        controls.object = activeCamera;
-        controls.update();
-
-        console.log(`Camera: ${useOrthographic ? 'orthographic' : 'perspective'}`);
-    }
-
-    updateProjectionMatrices(window.innerWidth, window.innerHeight);
-
-    // Renderer setup
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setClearColor(0x000000, 0);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -66,23 +43,11 @@ async function init() {
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    // OrbitControls for camera movement
-    const controls = new OrbitControls(activeCamera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.screenSpacePanning = false;
-    controls.minDistance = 2;
-    controls.maxDistance = 10;
-
-    // Load shaders
     let vertexShader, fragmentShader, vertexSimpleShader;
-//    let sparkleVertexShader, sparkleFragmentShader;
     try {
         vertexShader = await fetch('shaders/vertex.glsl').then(res => res.text());
         fragmentShader = await fetch('shaders/fragment.glsl').then(res => res.text());
         vertexSimpleShader = await fetch('shaders/vertex-simple.glsl').then(res => res.text());
-//        sparkleVertexShader = await fetch('shaders/sparkle-vertex.glsl').then(res => res.text());
-//        sparkleFragmentShader = await fetch('shaders/sparkle-fragment.glsl').then(res => res.text());
         console.log('Shaders loaded successfully!');
     } catch (error) {
         console.error('Error loading shaders:', error);
@@ -92,11 +57,10 @@ async function init() {
     const planeWidth = 4;
     const planeHeight = 1;
 
-    // Custom shader material
     const shaderMaterial = new THREE.ShaderMaterial({
         uniforms: {
             u_time: { value: 0.0 },
-            u_cameraPosition: { value: activeCamera.position },
+            u_cameraPosition: { value: camera.position },
             u_fresnelBias: { value: -0.05 },
             u_noiseScale: { value: new THREE.Vector3(0.5, 0.8, 1.0) },
             u_displacement: { value: 0.8 },
@@ -115,10 +79,9 @@ async function init() {
     plane.rotation.x = -Math.PI / 2;
     scene.add(plane);
 
-    // Create sphere with Fresnel shader
     const sphereShaderMaterial = new THREE.ShaderMaterial({
         uniforms: {
-            u_cameraPosition: { value: activeCamera.position },
+            u_cameraPosition: { value: camera.position },
             u_fresnelBias: { value: 0.04 }
         },
         vertexShader: vertexSimpleShader,
@@ -136,70 +99,32 @@ async function init() {
     const timer = new THREE.Timer();
     timer.connect(document);
 
-    // const sparkles = createSparkleSystem({
-    //     scene,
-    //     timer,
-    //     vertexShader: sparkleVertexShader,
-    //     fragmentShader: sparkleFragmentShader,
-    // });
-
-    // Add ambient light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
 
-    // Add directional light
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
     directionalLight.position.set(5, 5, 5);
     scene.add(directionalLight);
 
-    window.addEventListener('keydown', (event) => {
-        if (event.repeat) return;
-        if (event.key === 'c' || event.key === 'C') {
-            toggleCamera();
-        }
-        if (event.key === 'l' || event.key === 'L') {
-            console.log('position:', activeCamera.position.toArray());
-            console.log('target:', controls.target.toArray());
-            console.log('camera type:', useOrthographic ? 'orthographic' : 'perspective');
-            console.log('frustumSize:', frustumSize);
-        }
-    });
-
-    // Handle window resize
     window.addEventListener('resize', () => {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        
-        updateProjectionMatrices(width, height);
-        
-        renderer.setSize(width, height);
+        updateProjectionMatrix(window.innerWidth, window.innerHeight);
+        renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // Animation loop
     function animate(timestamp) {
         requestAnimationFrame(animate);
 
         timer.update(timestamp);
-        const elapsedTime = timer.getElapsed();
+        shaderMaterial.uniforms.u_time.value = timer.getElapsed();
 
-        shaderMaterial.uniforms.u_time.value = elapsedTime;
-        shaderMaterial.uniforms.u_cameraPosition.value.copy(activeCamera.position);
-        sphereShaderMaterial.uniforms.u_cameraPosition.value.copy(activeCamera.position);
-        //sparkles.update(elapsedTime);
-
-        // Update controls
-        controls.update();
-        
-        // Render scene
-        renderer.render(scene, activeCamera);
+        renderer.render(scene, camera);
     }
 
     animate();
-    
-    console.log('Scene initialized with plane, sphere, and sparkles');
+
+    console.log('Scene initialized');
 }
 
-// Start the application
 init().catch(error => {
     console.error('Failed to initialize:', error);
 });

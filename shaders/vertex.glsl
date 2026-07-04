@@ -117,7 +117,7 @@ void main() {
     float u = uv.x * TWO_PI - u_time * .2;
     float omega = TWO_PI/u_planeWidth; // we need this becuz chainrule
 
-    vec3 newPosition = vec3(position.x, position.y, u_amplitude * sin(u) - 0.28);
+    vec3 newPosition = vec3(position.x, position.y, u_amplitude * sin(u) - 0.1);
 
     // we add noise now
     // we want to calculate two diff noise patterns at any time. Then lerp between them
