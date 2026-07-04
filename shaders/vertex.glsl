@@ -114,16 +114,16 @@ void main() {
     const float TWO_PI = 6.2832;
 
     // we want to bend the plane along a sin curve and animate with time
-    float u = uv.x * TWO_PI - u_time * .5;
+    float u = uv.x * TWO_PI - u_time * .2;
     float omega = TWO_PI/u_planeWidth; // we need this becuz chainrule
 
-    vec3 newPosition = vec3(position.x, position.y, u_amplitude * sin(u));
+    vec3 newPosition = vec3(position.x, position.y, u_amplitude * sin(u) - 0.28);
 
     // we add noise now
     // we want to calculate two diff noise patterns at any time. Then lerp between them
     // in a three second interval
-    float interval = floor(u_time / 3.0);
-    float t = mod(u_time, 3.0) / 3.0; // normalize our t value (our lerp parameter)
+    float interval = floor(u_time / 6.0);
+    float t = mod(u_time, 6.0) / 6.0; // normalize our t value (our lerp parameter)
 
     vec3 samplePos = position * u_noiseScale + vec3(47.3, 83.1, 12.7);
 

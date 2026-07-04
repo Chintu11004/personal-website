@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
+//import { createSparkleSystem } from './sparkles.js';
 
 // Initialize the scene
 async function init() {
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a2e);
+    //scene.background = new THREE.Color(0x1a1a2e);
 
-    const frustumSize = 5;
+    const frustumSize = 10;
     const aspect = window.innerWidth / window.innerHeight;
 
     const perspectiveCamera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
@@ -58,6 +59,7 @@ async function init() {
 
     // Renderer setup
     const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setClearColor(0x000000, 0);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     const container = document.getElementById('container');
@@ -74,10 +76,13 @@ async function init() {
 
     // Load shaders
     let vertexShader, fragmentShader, vertexSimpleShader;
+//    let sparkleVertexShader, sparkleFragmentShader;
     try {
         vertexShader = await fetch('shaders/vertex.glsl').then(res => res.text());
         fragmentShader = await fetch('shaders/fragment.glsl').then(res => res.text());
         vertexSimpleShader = await fetch('shaders/vertex-simple.glsl').then(res => res.text());
+//        sparkleVertexShader = await fetch('shaders/sparkle-vertex.glsl').then(res => res.text());
+//        sparkleFragmentShader = await fetch('shaders/sparkle-fragment.glsl').then(res => res.text());
         console.log('Shaders loaded successfully!');
     } catch (error) {
         console.error('Error loading shaders:', error);
@@ -93,8 +98,8 @@ async function init() {
             u_time: { value: 0.0 },
             u_cameraPosition: { value: activeCamera.position },
             u_fresnelBias: { value: -0.05 },
-            u_noiseScale: { value: new THREE.Vector3(0.5, 1.2, 1.0) },
-            u_displacement: { value: 0.5 },
+            u_noiseScale: { value: new THREE.Vector3(0.5, 0.8, 1.0) },
+            u_displacement: { value: 0.8 },
             u_amplitude: { value: 0.3 },
             u_planeWidth: { value: planeWidth }
         },
@@ -128,6 +133,16 @@ async function init() {
     sphere.position.set(3, 2, 0);
     scene.add(sphere);
 
+    const timer = new THREE.Timer();
+    timer.connect(document);
+
+    // const sparkles = createSparkleSystem({
+    //     scene,
+    //     timer,
+    //     vertexShader: sparkleVertexShader,
+    //     fragmentShader: sparkleFragmentShader,
+    // });
+
     // Add ambient light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
@@ -142,6 +157,12 @@ async function init() {
         if (event.key === 'c' || event.key === 'C') {
             toggleCamera();
         }
+        if (event.key === 'l' || event.key === 'L') {
+            console.log('position:', activeCamera.position.toArray());
+            console.log('target:', controls.target.toArray());
+            console.log('camera type:', useOrthographic ? 'orthographic' : 'perspective');
+            console.log('frustumSize:', frustumSize);
+        }
     });
 
     // Handle window resize
@@ -155,14 +176,16 @@ async function init() {
     });
 
     // Animation loop
-    const clock = new THREE.Clock();
-
-    function animate() {
+    function animate(timestamp) {
         requestAnimationFrame(animate);
-        
-        shaderMaterial.uniforms.u_time.value = clock.getElapsedTime();
+
+        timer.update(timestamp);
+        const elapsedTime = timer.getElapsed();
+
+        shaderMaterial.uniforms.u_time.value = elapsedTime;
         shaderMaterial.uniforms.u_cameraPosition.value.copy(activeCamera.position);
         sphereShaderMaterial.uniforms.u_cameraPosition.value.copy(activeCamera.position);
+        //sparkles.update(elapsedTime);
 
         // Update controls
         controls.update();
@@ -173,7 +196,7 @@ async function init() {
 
     animate();
     
-    console.log('Scene initialized with plane and sphere');
+    console.log('Scene initialized with plane, sphere, and sparkles');
 }
 
 // Start the application
