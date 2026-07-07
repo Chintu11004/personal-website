@@ -1,34 +1,27 @@
-import { useEffect, useRef } from 'react';
-import { initScene } from './three/scene';
+import { Canvas } from '@react-three/fiber';
+import { Scene } from './three/Scene';
 import XMBNav from './components/XMBNav';
 import './App.css';
-
+import { useRef } from 'react';
 
 function App() {
-  const sceneInitialized = useRef(false);
-
-  useEffect(() => {
-    if (sceneInitialized.current) return;
-
-    const container = document.getElementById('container');
-    if (!container) {
-      console.error('Container element not found');
-      return;
-    }
-
-    initScene(container).then((sceneData) => {
-      if (sceneData) {
-        sceneInitialized.current = true;
-        console.log('Three.js scene ready');
-      }
-    }).catch(error => {
-      console.error('Failed to initialize Three.js scene:', error);
-    });
-  }, []);
+  const focusColRef = useRef({ value: 0 });
 
   return (
     <>
-      <XMBNav />
+      <Canvas
+        frameloop="always"
+        gl={{ antialias: true, alpha: true }}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 0,
+          background: 'transparent',
+        }}
+      >
+        <Scene focusColRef={focusColRef}/>
+      </Canvas>
+      <XMBNav focusColRef={focusColRef} />
     </>
   );
 }

@@ -1,7 +1,6 @@
 uniform sampler2D u_texture;
 uniform float u_opacity;
 uniform float u_selected;
-uniform vec3 u_cameraPosition;
 
 varying vec3 v_worldPosition;
 varying vec3 v_worldNormal;
@@ -14,6 +13,7 @@ void main() {
         discard;
     }
 
+    
     vec3 finalColor = texColor.rgb;
     float finalAlpha = texColor.a * u_opacity;
 

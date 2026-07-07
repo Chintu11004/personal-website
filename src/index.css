@@ -15,14 +15,6 @@ body {
   );
 }
 
-#container {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 0;
-}
-
 #root {
   position: fixed;
   inset: 0;
