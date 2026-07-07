@@ -1,0 +1,34 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
+  background: radial-gradient(
+    ellipse 150% 120% at 75% 20%,
+    #000a5b 0%,
+    #000a5b 20%,
+    #3357b7 100%
+  );
+}
+
+#container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+}
+
+#root {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+canvas {
+  display: block;
+}

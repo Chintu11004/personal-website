@@ -1,0 +1,125 @@
+.xmb-nav {
+  --item-width: 6.25vw;
+  --slot-width: 12vw;
+  --icon-size: 4.3vw;
+  --focus-x: calc(50% - 22vw);
+  --row-height: 15vh;
+
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10vh;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.xmb-row {
+  position: relative;
+  width: 100%;
+  height: var(--row-height);
+  transform: translateY(-18vh);
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.xmb-row.active-row {
+  opacity: 1;
+}
+
+.xmb-item {
+  position: absolute;
+  left: var(--focus-x);
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: var(--item-width);
+  height: var(--row-height);
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.2vh;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+  transform: translate(
+    calc(var(--col-offset) * var(--slot-width) - 50%),
+    0
+  ) scale(0.9);
+  transform-origin: center center;
+  opacity: 0.5;
+  pointer-events: auto;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.xmb-item.selected {
+  transform: translate(
+    calc(var(--col-offset) * var(--slot-width) - 50%),
+    0
+  ) scale(1.15);
+  opacity: 0.8;
+  text-shadow: 
+    0 0 20px rgba(255, 255, 255, 0.8),
+    0 0 40px rgba(255, 255, 255, 0.4),
+    2px 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.xmb-item-label {
+  width: 100%;
+  margin-top: 0.5vh;
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.xmb-icon-wrap {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.xmb-row-item-icon {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+}
+
+.xmb-hint {
+  position: fixed;
+  bottom: 3vh;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.4vh;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .xmb-nav {
+    --item-width: 14vw;
+    --slot-width: 17vw;
+    --icon-size: 12vw;
+    --focus-x: calc(50% - 18vw);
+    --row-height: 11vh;
+  }
+
+  .xmb-hint {
+    font-size: 1.2vh;
+    bottom: 2vh;
+  }
+}
