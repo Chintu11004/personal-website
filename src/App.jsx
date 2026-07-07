@@ -9,13 +9,15 @@ function App() {
 
   return (
     <>
+      <div className="app-background" aria-hidden="true" />
       <Canvas
         frameloop="always"
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: true, alpha: true, premultipliedAlpha: false }}
+        onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
         style={{
           position: 'fixed',
           inset: 0,
-          zIndex: 0,
+          zIndex: 1,
           background: 'transparent',
         }}
       >
