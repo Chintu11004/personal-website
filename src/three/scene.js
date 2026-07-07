@@ -216,7 +216,6 @@ export async function initScene(container) {
     };
 }
 
-
 export function syncNavIcons({iconElements, focusCol, focusRow}) {
     if (!camera_ref || iconMeshes.length == 0) return;
 
@@ -232,12 +231,22 @@ export function syncNavIcons({iconElements, focusCol, focusRow}) {
         const ndcX = (centerX / window.innerWidth) * 2 - 1;
         const ndcY = -(centerY / window.innerHeight) * 2 + 1;
 
-        const worldPos = new THREE.Vector3(ndcX, ndcY, 0);
-        worldPos.unproject(camera_ref); // converts it to world pos
+        // const worldPos = new THREE.Vector3(ndcX, ndcY, 0);
+        // worldPos.unproject(camera_ref); // converts it to world pos
+        // iconMeshes[i].position.copy(worldPos);
+        camera_ref.updateMatrixWorld(true);
+        const viewWidth = (camera_ref.right - camera_ref.left) /camera_ref.zoom;
+        const viewHeight = (camera_ref.top - camera_ref.bottom) / camera_ref.zoom;
 
-        // update plane position
-        iconMeshes[i].position.copy(worldPos);
-        iconMeshes[i].position.z = 0.5; // in front of the background (tpo be decided lmao)
+        const offset = new THREE.Vector3(
+            ndcX * viewWidth / 2,
+            ndcY * viewHeight / 2,
+            0
+        );
+        offset.applyQuaternion(camera_ref.quaternion);
+
+        iconMeshes[i].position.copy(camera_ref.position).add(offset);
+        iconMeshes[i].position.z = 0.0; // in front of the background (tpo be decided lmao)
 
         // scale the element accordingly
         // TODO need to account for zoom
@@ -247,7 +256,7 @@ export function syncNavIcons({iconElements, focusCol, focusRow}) {
 
         //update selection state
         const isSelected = i === focusCol;
-        iconMeshes[i].material.uniforms.u_selected.value = isSelected ? 1.0 : 0.0;
-        iconMeshes[i].material.uniforms.u_opacity.value = isSelected ? 0.8 : 0.5;
+        //iconMeshes[i].material.uniforms.u_selected.value = isSelected ? 1.0 : 0.0;
+        //iconMeshes[i].material.uniforms.u_opacity.value = isSelected ? 0.8 : 0.5;
     });
 }
