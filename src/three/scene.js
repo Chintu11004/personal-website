@@ -11,6 +11,26 @@ let navChangeHandler = null;
 let iconMeshes = [];
 let iconGroup_ref = null;
 let camera_ref = null;
+let getNavIconSyncState = null;
+let domSyncFrameId = null;
+let renderFrameId = null;
+
+export function registerNavIconSyncState(getter) {
+    getNavIconSyncState = getter;
+}
+
+export function unregisterNavIconSyncState() {
+    getNavIconSyncState = null;
+}
+
+function syncDomIconsFromState() {
+    if (!getNavIconSyncState) return;
+
+    const syncState = getNavIconSyncState();
+    if (syncState) {
+        syncNavIcons(syncState);
+    }
+}
 
 export function logIconMeshWorldPositions() {
     if (!iconGroup_ref) {
@@ -191,16 +211,22 @@ export async function initScene(container) {
 
     window.addEventListener('resize', handleResize);
 
-    function animate(timestamp) {
-        requestAnimationFrame(animate);
-
-        timer.update(timestamp);
-        shaderMaterial.uniforms.u_time.value = timer.getElapsed();
-
-        renderer.render(scene, camera);
+    // Read DOM positions in a separate rAF that runs before the render loop
+    // so mesh transforms match the latest CSS transition state for this frame.
+    function domSyncLoop() {
+        syncDomIconsFromState();
+        domSyncFrameId = requestAnimationFrame(domSyncLoop);
     }
 
-    animate();
+    function renderLoop(timestamp) {
+        timer.update(timestamp);
+        shaderMaterial.uniforms.u_time.value = timer.getElapsed();
+        renderer.render(scene, camera);
+        renderFrameId = requestAnimationFrame(renderLoop);
+    }
+
+    domSyncLoop();
+    renderLoop();
 
     console.log('Scene initialized');
     console.log('[debug] Run __debugScene.logIconPositions() to inspect icon mesh world positions');
@@ -210,6 +236,8 @@ export async function initScene(container) {
         camera,
         renderer,
         cleanup: () => {
+            if (domSyncFrameId !== null) cancelAnimationFrame(domSyncFrameId);
+            if (renderFrameId !== null) cancelAnimationFrame(renderFrameId);
             window.removeEventListener('resize', handleResize);
             renderer.dispose();
         }
@@ -217,28 +245,25 @@ export async function initScene(container) {
 }
 
 export function syncNavIcons({iconElements, focusCol, focusRow}) {
-    if (!camera_ref || iconMeshes.length == 0) return;
+    if (!camera_ref || iconMeshes.length === 0 || !iconElements) return;
+
+    camera_ref.updateMatrixWorld(true);
+
+    const viewWidth = (camera_ref.right - camera_ref.left) / camera_ref.zoom;
+    const viewHeight = (camera_ref.top - camera_ref.bottom) / camera_ref.zoom;
+    const offset = new THREE.Vector3();
 
     iconElements.forEach((element, i) => {
         if (!element || !iconMeshes[i]) return;
 
-        // get elemnent's screen position
         const rect = element.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
 
-        // convert screen pixels to normalized device coords
         const ndcX = (centerX / window.innerWidth) * 2 - 1;
         const ndcY = -(centerY / window.innerHeight) * 2 + 1;
 
-        // const worldPos = new THREE.Vector3(ndcX, ndcY, 0);
-        // worldPos.unproject(camera_ref); // converts it to world pos
-        // iconMeshes[i].position.copy(worldPos);
-        camera_ref.updateMatrixWorld(true);
-        const viewWidth = (camera_ref.right - camera_ref.left) /camera_ref.zoom;
-        const viewHeight = (camera_ref.top - camera_ref.bottom) / camera_ref.zoom;
-
-        const offset = new THREE.Vector3(
+        offset.set(
             ndcX * viewWidth / 2,
             ndcY * viewHeight / 2,
             0
@@ -246,17 +271,14 @@ export function syncNavIcons({iconElements, focusCol, focusRow}) {
         offset.applyQuaternion(camera_ref.quaternion);
 
         iconMeshes[i].position.copy(camera_ref.position).add(offset);
-        iconMeshes[i].position.z = 0.0; // in front of the background (tpo be decided lmao)
+        iconMeshes[i].position.z = 0.0;
 
-        // scale the element accordingly
-        // TODO need to account for zoom
         const worldWidth = rect.width * (camera_ref.right - camera_ref.left) / (window.innerWidth * camera_ref.zoom);
         const worldHeight = rect.height * (camera_ref.top - camera_ref.bottom) / (window.innerHeight * camera_ref.zoom);
         iconMeshes[i].scale.set(worldWidth, worldHeight, 1);
 
-        //update selection state
         const isSelected = i === focusCol;
-        //iconMeshes[i].material.uniforms.u_selected.value = isSelected ? 1.0 : 0.0;
-        //iconMeshes[i].material.uniforms.u_opacity.value = isSelected ? 0.8 : 0.5;
+        iconMeshes[i].material.uniforms.u_selected.value = isSelected ? 1.0 : 0.0;
+        iconMeshes[i].material.uniforms.u_opacity.value = isSelected ? 0.8 : 0.5;
     });
 }

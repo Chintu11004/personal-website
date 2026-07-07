@@ -47,6 +47,7 @@
   font-family: inherit;
   cursor: pointer;
   transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+  will-change: transform;
   transform: translate(
     calc(var(--col-offset) * var(--slot-width) - 50%),
     0

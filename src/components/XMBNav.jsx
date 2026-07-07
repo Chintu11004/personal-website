@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import './XMBNav.css';
-import { syncNavIcons } from '../three/scene';
+import { registerNavIconSyncState, unregisterNavIconSyncState } from '../three/scene';
 
 const navData = [
   {
@@ -21,6 +21,8 @@ const navData = [
 function XMBNav() {
   const [focus, setFocus] = useState({ row: 0, col: 0 });
   const iconRefs = useRef([]);
+  const focusRef = useRef(focus);
+  focusRef.current = focus;
 
   const getCurrentItem = useCallback(() => {
     const row = navData[focus.row];
@@ -120,14 +122,14 @@ function XMBNav() {
   };
 
   useEffect(() => {
-    syncNavIcons({
+    registerNavIconSyncState(() => ({
       iconElements: iconRefs.current,
-      focusCol: focus.col,
-      focusRow: focus.row
-    });
-  }, [focus]);
+      focusCol: focusRef.current.col,
+      focusRow: focusRef.current.row,
+    }));
 
-  // TODO on screen resize
+    return () => unregisterNavIconSyncState();
+  }, []);
 
   return (
     <nav className="xmb-nav" aria-label="Main navigation">
