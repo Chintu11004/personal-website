@@ -50,9 +50,6 @@ function XMBNav({ focusColRef }) {
 
   return (
     <nav className="xmb-nav" aria-label="Main navigation">
-      <div className="xmb-hint">
-        Use arrow keys to navigate • Enter to select
-      </div>
     </nav>
   );
 }

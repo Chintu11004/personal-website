@@ -5,7 +5,7 @@ import './App.css';
 import { useRef } from 'react';
 
 function App() {
-  const focusColRef = useRef({ value: 0 });
+  const focusColRef = useRef({ value: 4 });
 
   return (
     <>
