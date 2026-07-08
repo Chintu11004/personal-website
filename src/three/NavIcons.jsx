@@ -2,23 +2,22 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
-import { NURBSVolume } from 'three/examples/jsm/Addons.js';
 
 export const navItems = [
-  { label: 'User', image: '/images/retroarch.png' },
-  { label: 'Settings', image: '/images/setting.png' },
-  { label: 'Photo Projects', image: '/images/images.png' },
-  { label: 'SWE', image: '/images/Source Code - Various.png' },
-  { label: 'Games', image: '/images/default-content.png' },
-  { label: 'Contact Me', image: '/images/wifi.png' },
-  { label: 'Friends', image: '/images/friends.png' },
+  { label: 'User', image: '/icons/01.png' },
+  { label: 'Settings', image: '/icons/02.png' },
+  { label: 'Photo Projects', image: '/icons/03.png' },
+  { label: 'SWE', image: '/icons/23.png' },
+  { label: 'Games', image: '/icons/06.png' },
+  { label: 'Contact Me', image: '/icons/07.png' },
+  { label: 'Friends', image: '/icons/08.png' },
 ];
 
 const LAYOUT = {
-  spacing: 0.35,
-  verticalOffset: 0.3,
+  spacing: 0.33,
+  verticalOffset: 0.32,
   selectedScale: 1.15,
-  unselectedScale: 0.9,
+  unselectedScale: 0.83,
 };
 
 function lerp(start, end, t) {
@@ -33,11 +32,15 @@ function Icon({ index, item, focusColRef, shaders}) {
   const currentScale = useRef(1);
   const isSelectedRef = useRef(false);
   const materialRef = useRef();
+  const meshRef = useRef();
+  const htmlRef = useRef();
+  const targetLabelOpacity = useRef(0);
+  const currentLabelOpacity = useRef(0);
 
   const texture = useLoader(THREE.TextureLoader, item.image);
 
   useEffect(() => {
-    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.colorSpace = THREE.LinearSRGBColorSpace;
   }, [texture]);
 
   useFrame((state, delta) => {
@@ -48,8 +51,9 @@ function Icon({ index, item, focusColRef, shaders}) {
     const colOffset = index - focusCol;
 
     isSelectedRef.current = isSelected;
+    targetLabelOpacity.current = isSelected ? 1 : 0;
 
-    targetPosition.current.set((colOffset * LAYOUT.spacing) - 0.6, LAYOUT.verticalOffset, 0);
+    targetPosition.current.set((colOffset * LAYOUT.spacing) - 0.69, LAYOUT.verticalOffset, 0);
     targetScale.current = isSelected ? LAYOUT.selectedScale : LAYOUT.unselectedScale;
 
     const lerpFactor = Math.min(delta * 8, 1);
@@ -61,35 +65,49 @@ function Icon({ index, item, focusColRef, shaders}) {
     currentScale.current = lerp(currentScale.current, targetScale.current, lerpFactor);
 
     groupRef.current.position.copy(currentPosition.current);
-    groupRef.current.scale.setScalar(currentScale.current);
+    meshRef.current.scale.setScalar(currentScale.current);
+
+    currentLabelOpacity.current = lerp(
+      currentLabelOpacity.current,
+      targetLabelOpacity.current,
+      lerpFactor
+    );
+
+    if (htmlRef.current) {
+      htmlRef.current.style.opacity = String(currentLabelOpacity.current);
+    }
 
     if (materialRef.current) {
       materialRef.current.uniforms.u_selected.value = isSelected ? 1.0 : 0.0;
       materialRef.current.uniforms.u_opacity.value = isSelected ? 0.8 : 0.5;
     }
+
+    materialRef.current.uniforms.u_cameraPosition.value.copy(state.camera.position);
   }, -1);
 
   return (
     <group ref={groupRef}>
-      <mesh position={[0, 0.045, 0]} renderOrder={2}>
-        <planeGeometry args={[0.12, 0.12] }/>
+      <mesh ref={meshRef} position={[0, 0.045, 0]} renderOrder={2}>
+        <planeGeometry args={[0.18, 0.18] }/>
         <shaderMaterial 
           ref={materialRef}
           vertexShader={shaders.vertex}
           fragmentShader={shaders.fragment}
           uniforms={{
-            u_texture: {value: texture},
+            u_normData: {value: texture},
             u_opacity: {value: 0.5},
-            u_selected: {value: 0.0}
+            u_selected: {value: 0.0},
+            u_cameraPosition: {value: new THREE.Vector3()},
           }}
           transparent
           depthWrite={false}
           depthTest={false}
         />
       </mesh>
-      <Html position={[0, -0.045, 0]}
+      <Html ref={htmlRef} position={[0, -0.045, 0]}
         center
         style={{
+          opacity: 0,
           color: 'white',
           fontSize: '14px',
           fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",

@@ -51,7 +51,7 @@ export function BackgroundRibbon() {
           side: THREE.DoubleSide,
         });
 
-        geometry = new THREE.PlaneGeometry(PLANE_WIDTH, PLANE_HEIGHT, 128, 128);
+        geometry = new THREE.PlaneGeometry(PLANE_WIDTH, PLANE_HEIGHT, 64, 64);
         mesh = new THREE.Mesh(geometry, material);
         mesh.rotation.x = -Math.PI / 2;
         activeScene.add(mesh);
