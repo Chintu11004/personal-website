@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useLayoutEffect, useRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
@@ -25,16 +25,27 @@ function lerp(start, end, t) {
 }
 
 const SubItem = memo(function SubItem({ index, item, colIndex, masterOpacity, focusSubRowRef, shaders }) {
+  const focusSubRow = focusSubRowRef?.current?.values?.[colIndex] ?? 0;
+  const initialY = getRowY(index - focusSubRow);
+
   const groupRef = useRef();
   const meshRef = useRef();
   const materialRef = useRef();
   const htmlRef = useRef();
+  const targetY = useRef(initialY);
+  const currentY = useRef(initialY);
 
   const texture = useLoader(THREE.TextureLoader, item.image ?? DEFAULT_SUB_ICON);
 
   useEffect(() => {
     texture.colorSpace = THREE.LinearSRGBColorSpace;
   }, [texture]);
+
+  useLayoutEffect(() => {
+    if (groupRef.current) {
+      groupRef.current.position.y = currentY.current;
+    }
+  }, []);
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
@@ -43,7 +54,10 @@ const SubItem = memo(function SubItem({ index, item, colIndex, masterOpacity, fo
     const isSelected = index === focusSubRow;
     const rowOffset = index - focusSubRow;
 
-    groupRef.current.position.y = getRowY(rowOffset);
+    targetY.current = getRowY(rowOffset);
+    const lerpFactor = Math.min(delta * 8, 1);
+    currentY.current = lerp(currentY.current, targetY.current, lerpFactor);
+    groupRef.current.position.y = currentY.current;
 
     const itemOpacity = isSelected ? 0.8 : 0.5;
     const finalOpacity = itemOpacity * masterOpacity.current;

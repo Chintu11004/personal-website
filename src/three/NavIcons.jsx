@@ -1,4 +1,4 @@
-import { memo, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
@@ -51,21 +51,44 @@ function iconBodyPropsAreEqual(prev, next) {
 }
 
 const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, shaders }) {
-  const targetPosition = useRef(new THREE.Vector3());
-  const currentPosition = useRef(new THREE.Vector3());
-  const targetScale = useRef(1);
-  const currentScale = useRef(1);
+  const focusCol = focusColRef.current?.value ?? 0;
+  const colOffset = index - focusCol;
+  const isSelected = index === focusCol;
+  const initialPosition = new THREE.Vector3(
+    (colOffset * LAYOUT.spacing) - 0.69,
+    LAYOUT.verticalOffset,
+    0
+  );
+  const initialScale = isSelected ? LAYOUT.selectedScale : LAYOUT.unselectedScale;
+  const initialLabelOpacity = isSelected ? 1 : 0;
+
+  const targetPosition = useRef(initialPosition.clone());
+  const currentPosition = useRef(initialPosition.clone());
+  const targetScale = useRef(initialScale);
+  const currentScale = useRef(initialScale);
   const materialRef = useRef();
   const meshRef = useRef();
   const htmlRef = useRef();
-  const targetLabelOpacity = useRef(0);
-  const currentLabelOpacity = useRef(0);
+  const targetLabelOpacity = useRef(initialLabelOpacity);
+  const currentLabelOpacity = useRef(initialLabelOpacity);
 
   const texture = useLoader(THREE.TextureLoader, item.image);
 
   useEffect(() => {
     texture.colorSpace = THREE.LinearSRGBColorSpace;
   }, [texture]);
+
+  useLayoutEffect(() => {
+    if (groupRef.current) {
+      groupRef.current.position.copy(currentPosition.current);
+    }
+    if (meshRef.current) {
+      meshRef.current.scale.setScalar(currentScale.current);
+    }
+    if (htmlRef.current) {
+      htmlRef.current.style.opacity = String(currentLabelOpacity.current);
+    }
+  }, [groupRef]);
 
   useFrame((state, delta) => {
     if (!groupRef.current || !focusColRef.current || !meshRef.current) return;
