@@ -1,7 +1,10 @@
 import { memo, useEffect, useLayoutEffect, useRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
-import { Html } from '@react-three/drei';
 import * as THREE from 'three';
+import { IconShaderMesh } from './IconShaderMesh';
+import { IconLabel } from './IconLabel';
+import { SELECTION, useSelectionAnimation } from './hooks/useSelectionAnimation';
+import { lerp, lerpFactor } from './utils/animation';
 
 const LAYOUT = {
   spacing: 0.2,
@@ -9,6 +12,13 @@ const LAYOUT = {
   aboveInitialOffset: 0.4,
   iconSize: 0.12,
   iconTextGap: 0.06,
+};
+
+const SUB_SELECTION = {
+  selectedScale: 1.1,
+  unselectedScale: 0.95,
+  labelSelectedOpacity: SELECTION.selectedOpacity,
+  labelUnselectedOpacity: SELECTION.unselectedOpacity,
 };
 
 const DEFAULT_SUB_ICON = '/icons/dif.png';
@@ -20,13 +30,24 @@ function getRowY(rowOffset) {
   return LAYOUT.startY + LAYOUT.aboveInitialOffset + (-rowOffset - 1) * LAYOUT.spacing;
 }
 
-function lerp(start, end, t) {
-  return start + (end - start) * t;
+function subItemPropsAreEqual(prev, next) {
+  return (
+    prev.index === next.index &&
+    prev.item === next.item &&
+    prev.colIndex === next.colIndex &&
+    prev.masterOpacity === next.masterOpacity &&
+    prev.focusSubRowRef === next.focusSubRowRef &&
+    prev.shaders === next.shaders
+  );
 }
 
 const SubItem = memo(function SubItem({ index, item, colIndex, masterOpacity, focusSubRowRef, shaders }) {
   const focusSubRow = focusSubRowRef?.current?.values?.[colIndex] ?? 0;
   const initialY = getRowY(index - focusSubRow);
+  const isSelected = index === focusSubRow;
+  const initialScale = isSelected ? SUB_SELECTION.selectedScale : SUB_SELECTION.unselectedScale;
+  const initialShaderOpacity = isSelected ? SELECTION.selectedOpacity : SELECTION.unselectedOpacity;
+  const initialLabelOpacity = initialShaderOpacity;
 
   const groupRef = useRef();
   const meshRef = useRef();
@@ -34,6 +55,17 @@ const SubItem = memo(function SubItem({ index, item, colIndex, masterOpacity, fo
   const htmlRef = useRef();
   const targetY = useRef(initialY);
   const currentY = useRef(initialY);
+
+  const { step, applyInitial } = useSelectionAnimation({
+    meshRef,
+    materialRef,
+    htmlRef,
+    ...SUB_SELECTION,
+    masterOpacity,
+    initialScale,
+    initialShaderOpacity,
+    initialLabelOpacity,
+  });
 
   const texture = useLoader(THREE.TextureLoader, item.image ?? DEFAULT_SUB_ICON);
 
@@ -45,72 +77,42 @@ const SubItem = memo(function SubItem({ index, item, colIndex, masterOpacity, fo
     if (groupRef.current) {
       groupRef.current.position.y = currentY.current;
     }
-  }, []);
+    applyInitial();
+  }, [applyInitial]);
 
   useFrame((state, delta) => {
-    if (!groupRef.current) return;
+    if (!groupRef.current || !meshRef.current) return;
 
     const focusSubRow = focusSubRowRef?.current?.values?.[colIndex] ?? 0;
     const isSelected = index === focusSubRow;
-    const rowOffset = index - focusSubRow;
 
-    targetY.current = getRowY(rowOffset);
-    const lerpFactor = Math.min(delta * 8, 1);
-    currentY.current = lerp(currentY.current, targetY.current, lerpFactor);
+    targetY.current = getRowY(index - focusSubRow);
+    currentY.current = lerp(currentY.current, targetY.current, lerpFactor(delta));
     groupRef.current.position.y = currentY.current;
 
-    const itemOpacity = isSelected ? 0.8 : 0.5;
-    const finalOpacity = itemOpacity * masterOpacity.current;
-
-    if (htmlRef.current) {
-      htmlRef.current.style.opacity = String(finalOpacity);
-    }
-
-    if (materialRef.current) {
-      materialRef.current.uniforms.u_selected.value = isSelected ? 1.0 : 0.0;
-      materialRef.current.uniforms.u_opacity.value = finalOpacity;
-      materialRef.current.uniforms.u_cameraPosition.value.copy(state.camera.position);
-    }
+    step(isSelected, delta, state.camera.position);
   });
 
   return (
     <group ref={groupRef}>
-      <mesh ref={meshRef} position={[0, 0, 0]} renderOrder={2}>
-        <planeGeometry args={[LAYOUT.iconSize, LAYOUT.iconSize]} />
-        <shaderMaterial
-          ref={materialRef}
-          vertexShader={shaders.vertex}
-          fragmentShader={shaders.fragment}
-          uniforms={{
-            u_normData: { value: texture },
-            u_opacity: { value: 0 },
-            u_selected: { value: 0.0 },
-            u_cameraPosition: { value: new THREE.Vector3() },
-          }}
-          transparent
-          depthWrite={false}
-          depthTest={false}
-        />
-      </mesh>
-      <Html
-        ref={htmlRef}
+      <IconShaderMesh
+        texture={texture}
+        shaders={shaders}
+        size={LAYOUT.iconSize}
+        meshRef={meshRef}
+        materialRef={materialRef}
+        initialOpacity={0}
+      />
+      <IconLabel
+        label={item.label}
         position={[LAYOUT.iconSize, 0, 0]}
-        style={{
-          opacity: 0,
-          color: 'white',
-          fontSize: '13px',
-          fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-          whiteSpace: 'nowrap',
-          pointerEvents: 'none',
-          userSelect: 'none',
-          textAlign: 'left',
-        }}
-      >
-        {item.label}
-      </Html>
+        htmlRef={htmlRef}
+        fontSize="13px"
+        style={{ textAlign: 'left' }}
+      />
     </group>
   );
-});
+}, subItemPropsAreEqual);
 
 export const VerticalSubMenu = memo(function VerticalSubMenu({
   items,
@@ -125,8 +127,7 @@ export const VerticalSubMenu = memo(function VerticalSubMenu({
 
   useFrame((_, delta) => {
     const target = mode === 'active' ? 1 : 0;
-    const lerpFactor = Math.min(delta * 8, 1);
-    masterOpacity.current = lerp(masterOpacity.current, target, lerpFactor);
+    masterOpacity.current = lerp(masterOpacity.current, target, lerpFactor(delta));
 
     if (mode === 'exiting' && masterOpacity.current <= 0.01 && !didComplete.current) {
       didComplete.current = true;

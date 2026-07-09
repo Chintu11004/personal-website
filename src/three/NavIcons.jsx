@@ -1,8 +1,12 @@
-import { memo, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { memo, Suspense, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
-import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { VerticalSubMenu } from './VerticalSubMenu';
+import { IconShaderMesh } from './IconShaderMesh';
+import { IconLabel } from './IconLabel';
+import { useIconShaders } from './hooks/useIconShaders';
+import { SELECTION, useSelectionAnimation } from './hooks/useSelectionAnimation';
+import { lerp, lerpFactor } from './utils/animation';
 
 export const navItems = [
   { label: 'User', image: '/icons/01.png' },
@@ -32,13 +36,7 @@ export const navItems = [
 const LAYOUT = {
   spacing: 0.33,
   verticalOffset: 0.32,
-  selectedScale: 1.15,
-  unselectedScale: 0.83,
 };
-
-function lerp(start, end, t) {
-  return start + (end - start) * t;
-}
 
 function iconBodyPropsAreEqual(prev, next) {
   return (
@@ -59,18 +57,24 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, sh
     LAYOUT.verticalOffset,
     0
   );
-  const initialScale = isSelected ? LAYOUT.selectedScale : LAYOUT.unselectedScale;
-  const initialLabelOpacity = isSelected ? 1 : 0;
+  const initialScale = isSelected ? SELECTION.selectedScale : SELECTION.unselectedScale;
+  const initialShaderOpacity = isSelected ? SELECTION.selectedOpacity : SELECTION.unselectedOpacity;
+  const initialLabelOpacity = isSelected ? SELECTION.labelSelectedOpacity : SELECTION.labelUnselectedOpacity;
 
   const targetPosition = useRef(initialPosition.clone());
   const currentPosition = useRef(initialPosition.clone());
-  const targetScale = useRef(initialScale);
-  const currentScale = useRef(initialScale);
   const materialRef = useRef();
   const meshRef = useRef();
   const htmlRef = useRef();
-  const targetLabelOpacity = useRef(initialLabelOpacity);
-  const currentLabelOpacity = useRef(initialLabelOpacity);
+
+  const { step, applyInitial } = useSelectionAnimation({
+    meshRef,
+    materialRef,
+    htmlRef,
+    initialScale,
+    initialShaderOpacity,
+    initialLabelOpacity,
+  });
 
   const texture = useLoader(THREE.TextureLoader, item.image);
 
@@ -82,13 +86,8 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, sh
     if (groupRef.current) {
       groupRef.current.position.copy(currentPosition.current);
     }
-    if (meshRef.current) {
-      meshRef.current.scale.setScalar(currentScale.current);
-    }
-    if (htmlRef.current) {
-      htmlRef.current.style.opacity = String(currentLabelOpacity.current);
-    }
-  }, [groupRef]);
+    applyInitial();
+  }, [groupRef, applyInitial]);
 
   useFrame((state, delta) => {
     if (!groupRef.current || !focusColRef.current || !meshRef.current) return;
@@ -97,72 +96,33 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, sh
     const isSelected = index === focusCol;
     const colOffset = index - focusCol;
 
-    targetLabelOpacity.current = isSelected ? 1 : 0;
     targetPosition.current.set((colOffset * LAYOUT.spacing) - 0.69, LAYOUT.verticalOffset, 0);
-    targetScale.current = isSelected ? LAYOUT.selectedScale : LAYOUT.unselectedScale;
 
-    const lerpFactor = Math.min(delta * 8, 1);
-
-    currentPosition.current.x = lerp(currentPosition.current.x, targetPosition.current.x, lerpFactor);
-    currentPosition.current.y = lerp(currentPosition.current.y, targetPosition.current.y, lerpFactor);
-    currentPosition.current.z = lerp(currentPosition.current.z, targetPosition.current.z, lerpFactor);
-    currentScale.current = lerp(currentScale.current, targetScale.current, lerpFactor);
+    const t = lerpFactor(delta);
+    currentPosition.current.x = lerp(currentPosition.current.x, targetPosition.current.x, t);
+    currentPosition.current.y = lerp(currentPosition.current.y, targetPosition.current.y, t);
+    currentPosition.current.z = lerp(currentPosition.current.z, targetPosition.current.z, t);
 
     groupRef.current.position.copy(currentPosition.current);
-    meshRef.current.scale.setScalar(currentScale.current);
-
-    currentLabelOpacity.current = lerp(
-      currentLabelOpacity.current,
-      targetLabelOpacity.current,
-      lerpFactor
-    );
-
-    if (htmlRef.current) {
-      htmlRef.current.style.opacity = String(currentLabelOpacity.current);
-    }
-
-    if (materialRef.current) {
-      materialRef.current.uniforms.u_selected.value = isSelected ? 1.0 : 0.0;
-      materialRef.current.uniforms.u_opacity.value = isSelected ? 0.8 : 0.5;
-      materialRef.current.uniforms.u_cameraPosition.value.copy(state.camera.position);
-    }
+    step(isSelected, delta, state.camera.position);
   }, -1);
 
   return (
     <>
-      <mesh ref={meshRef} position={[0, 0.045, 0]} renderOrder={2}>
-        <planeGeometry args={[0.18, 0.18]} />
-        <shaderMaterial
-          ref={materialRef}
-          vertexShader={shaders.vertex}
-          fragmentShader={shaders.fragment}
-          uniforms={{
-            u_normData: { value: texture },
-            u_opacity: { value: 0.5 },
-            u_selected: { value: 0.0 },
-            u_cameraPosition: { value: new THREE.Vector3() },
-          }}
-          transparent
-          depthWrite={false}
-          depthTest={false}
-        />
-      </mesh>
-      <Html
-        ref={htmlRef}
+      <IconShaderMesh
+        texture={texture}
+        shaders={shaders}
+        size={0.18}
+        position={[0, 0.045, 0]}
+        meshRef={meshRef}
+        materialRef={materialRef}
+      />
+      <IconLabel
+        label={item.label}
         position={[0, -0.045, 0]}
+        htmlRef={htmlRef}
         center
-        style={{
-          opacity: 0,
-          color: 'white',
-          fontSize: '14px',
-          fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-          whiteSpace: 'nowrap',
-          pointerEvents: 'none',
-          userSelect: 'none',
-        }}
-      >
-        {item.label}
-      </Html>
+      />
     </>
   );
 }, iconBodyPropsAreEqual);
@@ -207,14 +167,7 @@ export const NavIcons = memo(function NavIcons({
   focusColRef,
   focusSubRowRef,
 }) {
-  const [shaders, setShaders] = useState(null);
-
-  useEffect(() => {
-    Promise.all([
-      fetch('/shaders/icon-vertex.glsl').then((res) => res.text()),
-      fetch('/shaders/icon-fragment.glsl').then((res) => res.text()),
-    ]).then(([vertex, fragment]) => setShaders({ vertex, fragment }));
-  }, []);
+  const shaders = useIconShaders();
 
   if (!shaders) return null;
 
