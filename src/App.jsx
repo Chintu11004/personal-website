@@ -6,6 +6,7 @@ import { useRef } from 'react';
 
 function App() {
   const focusColRef = useRef({ value: 4 });
+  const focusSubRowRef = useRef({ value: 0 });
 
   return (
     <>
@@ -21,9 +22,9 @@ function App() {
           background: 'transparent',
         }}
       >
-        <Scene focusColRef={focusColRef}/>
+        <Scene focusColRef={focusColRef} focusSubRowRef={focusSubRowRef} />
       </Canvas>
-      <XMBNav focusColRef={focusColRef} />
+      <XMBNav focusColRef={focusColRef} focusSubRowRef={focusSubRowRef} />
     </>
   );
 }

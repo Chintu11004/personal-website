@@ -2,13 +2,29 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
+import { VerticalSubMenu } from './VerticalSubMenu';
 
 export const navItems = [
   { label: 'User', image: '/icons/01.png' },
   { label: 'Settings', image: '/icons/02.png' },
-  { label: 'Photo Projects', image: '/icons/03.png' },
+  {
+    label: 'Photo Projects',
+    image: '/icons/03.png',
+    items: [
+      { label: 'University of Wisocnsin-Madison Campus' },
+      { label: 'Dream Simulator' },
+      { label: 'UW Arboretum' },
+    ],
+  },
   { label: 'SWE', image: '/icons/23.png' },
-  { label: 'Games', image: '/icons/06.png' },
+  {
+    label: 'Games',
+    image: '/icons/06.png',
+    items: [
+      { label: 'Tron: Jump-Man' },
+      { label: 'Jungle Warriors' },
+    ],
+  },
   { label: 'Contact Me', image: '/icons/07.png' },
   { label: 'Friends', image: '/icons/08.png' },
 ];
@@ -24,7 +40,7 @@ function lerp(start, end, t) {
   return start + (end - start) * t;
 }
 
-function Icon({ index, item, focusColRef, shaders}) {
+function Icon({ index, item, focusColRef, focusSubRowRef, shaders }) {
   const groupRef = useRef();
   const targetPosition = useRef(new THREE.Vector3());
   const currentPosition = useRef(new THREE.Vector3());
@@ -118,11 +134,20 @@ function Icon({ index, item, focusColRef, shaders}) {
       >
         {item.label}
       </Html>
+      {item.items?.length > 0 && (
+        <VerticalSubMenu
+          items={item.items}
+          parentColIndex={index}
+          focusColRef={focusColRef}
+          focusSubRowRef={focusSubRowRef}
+          shaders={shaders}
+        />
+      )}
     </group>
   );
 }
 
-export function NavIcons({ focusColRef }) {
+export function NavIcons({ focusColRef, focusSubRowRef }) {
   const [shaders, setShaders] = useState(null);
 
   useEffect(() => {
@@ -137,7 +162,14 @@ export function NavIcons({ focusColRef }) {
   return (
     <Suspense fallback={null}>
       {navItems.map((item, index) => (
-        <Icon key={index} index={index} item={item} focusColRef={focusColRef} shaders={shaders} />
+        <Icon
+          key={index}
+          index={index}
+          item={item}
+          focusColRef={focusColRef}
+          focusSubRowRef={focusSubRowRef}
+          shaders={shaders}
+        />
       ))}
     </Suspense>
   );

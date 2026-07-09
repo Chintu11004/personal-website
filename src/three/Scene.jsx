@@ -11,7 +11,7 @@ const CAMERA = {
   zoom: 6.264789413459975,
 };
 
-export function Scene({ focusColRef }) {
+export function Scene({ focusColRef, focusSubRowRef }) {
   const size = useThree((state) => state.size);
   const camera = useThree((state) => state.camera);
   const aspect = size.width / size.height;
@@ -37,7 +37,7 @@ export function Scene({ focusColRef }) {
         far={1000}
       />
       <BackgroundRibbon />
-      <NavIcons focusColRef={focusColRef} />
+      <NavIcons focusColRef={focusColRef} focusSubRowRef={focusSubRowRef}/>
     </>
   );
 }
