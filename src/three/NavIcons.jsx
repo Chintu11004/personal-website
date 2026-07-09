@@ -36,6 +36,8 @@ export const navItems = [
 const LAYOUT = {
   spacing: 0.33,
   verticalOffset: 0.32,
+  depthSelect_OffsetX: -0.45,
+  depthUnselect_OffsetX: -0.2
 };
 
 function iconBodyPropsAreEqual(prev, next) {
@@ -44,11 +46,12 @@ function iconBodyPropsAreEqual(prev, next) {
     prev.item === next.item &&
     prev.groupRef === next.groupRef &&
     prev.focusColRef === next.focusColRef &&
+    prev.navDepthRef === next.navDepthRef &&
     prev.shaders === next.shaders
   );
 }
 
-const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, shaders }) {
+const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, navDepthRef, shaders }) {
   const focusCol = focusColRef.current?.value ?? 0;
   const colOffset = index - focusCol;
   const isSelected = index === focusCol;
@@ -63,6 +66,7 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, sh
 
   const targetPosition = useRef(initialPosition.clone());
   const currentPosition = useRef(initialPosition.clone());
+  const contentRef = useRef();
   const materialRef = useRef();
   const meshRef = useRef();
   const htmlRef = useRef();
@@ -71,6 +75,7 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, sh
     meshRef,
     materialRef,
     htmlRef,
+    positionRef: contentRef,
     initialScale,
     initialShaderOpacity,
     initialLabelOpacity,
@@ -95,20 +100,28 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, sh
     const focusCol = focusColRef.current.value;
     const isSelected = index === focusCol;
     const colOffset = index - focusCol;
+    const depth = navDepthRef?.current?.value ?? 0;
+    const t = lerpFactor(delta);
 
     targetPosition.current.set((colOffset * LAYOUT.spacing) - 0.69, LAYOUT.verticalOffset, 0);
 
-    const t = lerpFactor(delta);
     currentPosition.current.x = lerp(currentPosition.current.x, targetPosition.current.x, t);
     currentPosition.current.y = lerp(currentPosition.current.y, targetPosition.current.y, t);
     currentPosition.current.z = lerp(currentPosition.current.z, targetPosition.current.z, t);
 
     groupRef.current.position.copy(currentPosition.current);
-    step(isSelected, delta, state.camera.position);
+
+    step(delta, state.camera.position, {
+      isSelected,
+      targetX: isSelected && (depth > 0) ? LAYOUT.depthSelect_OffsetX : depth > 0 ? LAYOUT.depthUnselect_OffsetX : 0,
+      targetScale: isSelected ? SELECTION.selectedScale : (depth > 0) ? SELECTION.depthUnselectedScale : SELECTION.unselectedScale,
+      targetShaderOpacity: isSelected ? SELECTION.selectedOpacity : (depth > 0) ? SELECTION.depthUnselectedOpacity : SELECTION.unselectedOpacity,
+      targetLabelOpacity: isSelected ? SELECTION.labelSelectedOpacity : SELECTION.labelUnselectedOpacity,
+    });
   }, -1);
 
   return (
-    <>
+    <group ref={contentRef}>
       <IconShaderMesh
         texture={texture}
         shaders={shaders}
@@ -123,11 +136,11 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, sh
         htmlRef={htmlRef}
         center
       />
-    </>
+    </group>
   );
 }, iconBodyPropsAreEqual);
 
-function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusColRef, focusSubRowRef, shaders }) {
+function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusColRef, focusSubRowRef, navDepthRef, shaders }) {
   const groupRef = useRef();
   const isActive = index === focusCol;
   const isExiting = exitingCols.includes(index);
@@ -144,6 +157,7 @@ function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusCo
         item={item}
         groupRef={groupRef}
         focusColRef={focusColRef}
+        navDepthRef={navDepthRef}
         shaders={shaders}
       />
       {showSubMenu && (
@@ -153,6 +167,8 @@ function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusCo
           mode={isActive ? 'active' : 'exiting'}
           onExitComplete={handleExitComplete}
           focusSubRowRef={focusSubRowRef}
+          focusColRef={focusColRef}
+          navDepthRef={navDepthRef}
           shaders={shaders}
         />
       )}
@@ -166,6 +182,7 @@ export const NavIcons = memo(function NavIcons({
   removingExitingCols,
   focusColRef,
   focusSubRowRef,
+  navDepthRef,
 }) {
   const shaders = useIconShaders();
 
@@ -180,6 +197,7 @@ export const NavIcons = memo(function NavIcons({
           item={item}
           focusColRef={focusColRef}
           focusSubRowRef={focusSubRowRef}
+          navDepthRef={navDepthRef}
           shaders={shaders}
           focusCol={focusCol}
           exitingCols={exitingCols}

@@ -11,7 +11,7 @@ const CAMERA = {
   zoom: 6.264789413459975,
 };
 
-export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, focusCol, exitingCols, removingExitingCols }) {
+export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDepthRef, focusCol, exitingCols, removingExitingCols }) {
   const size = useThree((state) => state.size);
   const camera = useThree((state) => state.camera);
   const aspect = size.width / size.height;
@@ -37,7 +37,14 @@ export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, focusCo
         far={1000}
       />
       <BackgroundRibbon />
-      <NavIcons focusCol={focusCol} exitingCols={exitingCols} removingExitingCols={removingExitingCols} focusColRef={focusColRef} focusSubRowRef={focusSubRowRef}/>
+      <NavIcons
+        focusCol={focusCol}
+        exitingCols={exitingCols}
+        removingExitingCols={removingExitingCols}
+        focusColRef={focusColRef}
+        focusSubRowRef={focusSubRowRef}
+        navDepthRef={navDepthRef}
+      />
     </>
   );
 });

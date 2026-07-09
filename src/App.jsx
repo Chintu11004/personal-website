@@ -10,6 +10,7 @@ function App() {
   const [exitingCols, setExitingCols] = useState([]);
   const focusColRef = useRef({value: 4});
   const focusSubRowRef = useRef({ values: navItems.map(() => 0) });
+  const navDepthRef = useRef({ value: 0 });
 
   const removingExitingCol = useCallback((colIndex) => {
     setExitingCols((prev) => prev.filter((c) => c !== colIndex));
@@ -25,6 +26,7 @@ function App() {
 
     setExitingCols((prev) => prev.filter((c) => c !== newCol));
 
+    navDepthRef.current.value = 0;
     focusColRef.current.value = newCol;
     setFocusCol(newCol);
   }, []);
@@ -43,9 +45,21 @@ function App() {
           background: 'transparent',
         }}
       >
-        <Scene focusColRef={focusColRef} focusSubRowRef={focusSubRowRef} focusCol={focusCol} exitingCols={exitingCols} removingExitingCols={removingExitingCol}/>
+        <Scene
+          focusColRef={focusColRef}
+          focusSubRowRef={focusSubRowRef}
+          navDepthRef={navDepthRef}
+          focusCol={focusCol}
+          exitingCols={exitingCols}
+          removingExitingCols={removingExitingCol}
+        />
       </Canvas>
-      <XMBNav focusColRef={focusColRef} focusSubRowRef={focusSubRowRef} navigateToCol={navigateToCol}/>
+      <XMBNav
+        focusColRef={focusColRef}
+        focusSubRowRef={focusSubRowRef}
+        navDepthRef={navDepthRef}
+        navigateToCol={navigateToCol}
+      />
     </>
   );
 }

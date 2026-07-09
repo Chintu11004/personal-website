@@ -1,31 +1,41 @@
-import { useRef, useEffect } from 'react';
+import { useEffect } from 'react';
 import { navItems } from '../three/NavIcons';
 import './XMBNav.css';
 
 export const navData = navItems;
 
-function XMBNav({ focusColRef, focusSubRowRef, navigateToCol }) {
-  const pendingNavigationRef = useRef(null);
-
+function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!focusColRef.current) return;
 
       const col = focusColRef.current.value;
+      const depth = navDepthRef?.current?.value ?? 0;
       const subItems = navItems[col]?.items ?? [];
       const maxSubRow = Math.max(0, subItems.length - 1);
       const getSubRow = () => focusSubRowRef?.current?.values?.[col] ?? 0;
       const setSubRow = (val) => {
         if (focusSubRowRef?.current?.values) focusSubRowRef.current.values[col] = val;
       };
+      const setDepth = (val) => {
+        if (navDepthRef?.current) navDepthRef.current.value = val;
+      };
 
       switch (e.key) {
         case 'ArrowLeft':
           e.preventDefault();
+          if (depth > 0) {
+            setDepth(0);
+            break;
+          }
           navigateToCol(Math.max(0, col - 1));
           break;
         case 'ArrowRight':
           e.preventDefault();
+          if (depth > 0) {
+            setDepth(0);
+            break;
+          }
           navigateToCol(Math.min(navItems.length - 1, col + 1));
           break;
         case 'ArrowUp':
@@ -41,6 +51,10 @@ function XMBNav({ focusColRef, focusSubRowRef, navigateToCol }) {
         case 'Enter':
         case ' ':
           e.preventDefault();
+          if (subItems.length > 0 && depth === 0) {
+            setDepth(1);
+            break;
+          }
           {
             const subItem = subItems[getSubRow()];
             const item = navItems[col];
@@ -54,6 +68,13 @@ function XMBNav({ focusColRef, focusSubRowRef, navigateToCol }) {
             }
           }
           break;
+        case 'Escape':
+        case 'Backspace':
+          if (depth > 0) {
+            e.preventDefault();
+            setDepth(0);
+          }
+          break;
         default:
           break;
       }
@@ -61,7 +82,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navigateToCol }) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusColRef, focusSubRowRef]);
+  }, [focusColRef, focusSubRowRef, navDepthRef, navigateToCol]);
 
   return (
     <nav className="xmb-nav" aria-label="Main navigation">

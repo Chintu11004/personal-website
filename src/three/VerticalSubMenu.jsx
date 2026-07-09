@@ -12,13 +12,17 @@ const LAYOUT = {
   aboveInitialOffset: 0.4,
   iconSize: 0.12,
   iconTextGap: 0.06,
+  depthSelectOffsetX: -0.45,
+  depthUnselectOffsetX: -0.2
 };
 
 const SUB_SELECTION = {
   selectedScale: 1.1,
   unselectedScale: 0.95,
+  depthUnselectedScale: 0.55,
   labelSelectedOpacity: SELECTION.selectedOpacity,
   labelUnselectedOpacity: SELECTION.unselectedOpacity,
+  depthUnselectedLabelOpacity: 0,
 };
 
 const DEFAULT_SUB_ICON = '/icons/dif.png';
@@ -37,11 +41,22 @@ function subItemPropsAreEqual(prev, next) {
     prev.colIndex === next.colIndex &&
     prev.masterOpacity === next.masterOpacity &&
     prev.focusSubRowRef === next.focusSubRowRef &&
+    prev.focusColRef === next.focusColRef &&
+    prev.navDepthRef === next.navDepthRef &&
     prev.shaders === next.shaders
   );
 }
 
-const SubItem = memo(function SubItem({ index, item, colIndex, masterOpacity, focusSubRowRef, shaders }) {
+const SubItem = memo(function SubItem({
+  index,
+  item,
+  colIndex,
+  masterOpacity,
+  focusSubRowRef,
+  focusColRef,
+  navDepthRef,
+  shaders,
+}) {
   const focusSubRow = focusSubRowRef?.current?.values?.[colIndex] ?? 0;
   const initialY = getRowY(index - focusSubRow);
   const isSelected = index === focusSubRow;
@@ -53,13 +68,13 @@ const SubItem = memo(function SubItem({ index, item, colIndex, masterOpacity, fo
   const meshRef = useRef();
   const materialRef = useRef();
   const htmlRef = useRef();
-  const targetY = useRef(initialY);
-  const currentY = useRef(initialY);
 
   const { step, applyInitial } = useSelectionAnimation({
     meshRef,
     materialRef,
     htmlRef,
+    positionRef: groupRef,
+    initialPosition: { x: 0, y: initialY, z: 0 },
     ...SUB_SELECTION,
     masterOpacity,
     initialScale,
@@ -74,9 +89,6 @@ const SubItem = memo(function SubItem({ index, item, colIndex, masterOpacity, fo
   }, [texture]);
 
   useLayoutEffect(() => {
-    if (groupRef.current) {
-      groupRef.current.position.y = currentY.current;
-    }
     applyInitial();
   }, [applyInitial]);
 
@@ -85,12 +97,18 @@ const SubItem = memo(function SubItem({ index, item, colIndex, masterOpacity, fo
 
     const focusSubRow = focusSubRowRef?.current?.values?.[colIndex] ?? 0;
     const isSelected = index === focusSubRow;
+    const isFocusCol = (focusColRef?.current?.value ?? 0) === colIndex;
+    const depth = navDepthRef?.current?.value ?? 0;
+    const entered = isFocusCol && depth > 0;
 
-    targetY.current = getRowY(index - focusSubRow);
-    currentY.current = lerp(currentY.current, targetY.current, lerpFactor(delta));
-    groupRef.current.position.y = currentY.current;
-
-    step(isSelected, delta, state.camera.position);
+    step(delta, state.camera.position, {
+      isSelected,
+      targetX: isSelected && entered ? LAYOUT.depthSelectOffsetX : entered ? LAYOUT.depthUnselectOffsetX : 0,
+      targetY: getRowY(index - focusSubRow),
+      targetScale: isSelected ? SUB_SELECTION.selectedScale : entered ? SUB_SELECTION.depthUnselectedScale : SUB_SELECTION.unselectedScale,
+      targetShaderOpacity: isSelected ? SELECTION.selectedOpacity : entered ? SELECTION.depthUnselectedOpacity + 0.25 : SELECTION.unselectedOpacity,
+      targetLabelOpacity: isSelected ? SUB_SELECTION.labelSelectedOpacity : entered ? SUB_SELECTION.depthUnselectedLabelOpacity : SUB_SELECTION.labelUnselectedOpacity,
+    });
   });
 
   return (
@@ -108,7 +126,8 @@ const SubItem = memo(function SubItem({ index, item, colIndex, masterOpacity, fo
         position={[LAYOUT.iconSize, 0, 0]}
         htmlRef={htmlRef}
         fontSize="13px"
-        style={{ textAlign: 'left' }}
+        style={{textAlign:"left", transform: 'translateY(-50%)'}}
+        center
       />
     </group>
   );
@@ -120,6 +139,8 @@ export const VerticalSubMenu = memo(function VerticalSubMenu({
   mode,
   onExitComplete,
   focusSubRowRef,
+  focusColRef,
+  navDepthRef,
   shaders,
 }) {
   const masterOpacity = useRef(mode === 'active' ? 0 : 1);
@@ -147,6 +168,8 @@ export const VerticalSubMenu = memo(function VerticalSubMenu({
           colIndex={colIndex}
           masterOpacity={masterOpacity}
           focusSubRowRef={focusSubRowRef}
+          focusColRef={focusColRef}
+          navDepthRef={navDepthRef}
           shaders={shaders}
         />
       ))}
