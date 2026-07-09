@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { memo, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
@@ -40,13 +40,21 @@ function lerp(start, end, t) {
   return start + (end - start) * t;
 }
 
-function Icon({ index, item, focusColRef, focusSubRowRef, shaders }) {
-  const groupRef = useRef();
+function iconBodyPropsAreEqual(prev, next) {
+  return (
+    prev.index === next.index &&
+    prev.item === next.item &&
+    prev.groupRef === next.groupRef &&
+    prev.focusColRef === next.focusColRef &&
+    prev.shaders === next.shaders
+  );
+}
+
+const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, shaders }) {
   const targetPosition = useRef(new THREE.Vector3());
   const currentPosition = useRef(new THREE.Vector3());
   const targetScale = useRef(1);
   const currentScale = useRef(1);
-  const isSelectedRef = useRef(false);
   const materialRef = useRef();
   const meshRef = useRef();
   const htmlRef = useRef();
@@ -60,15 +68,13 @@ function Icon({ index, item, focusColRef, focusSubRowRef, shaders }) {
   }, [texture]);
 
   useFrame((state, delta) => {
-    if (!groupRef.current || !focusColRef.current) return;
+    if (!groupRef.current || !focusColRef.current || !meshRef.current) return;
 
     const focusCol = focusColRef.current.value;
     const isSelected = index === focusCol;
     const colOffset = index - focusCol;
 
-    isSelectedRef.current = isSelected;
     targetLabelOpacity.current = isSelected ? 1 : 0;
-
     targetPosition.current.set((colOffset * LAYOUT.spacing) - 0.69, LAYOUT.verticalOffset, 0);
     targetScale.current = isSelected ? LAYOUT.selectedScale : LAYOUT.unselectedScale;
 
@@ -77,7 +83,6 @@ function Icon({ index, item, focusColRef, focusSubRowRef, shaders }) {
     currentPosition.current.x = lerp(currentPosition.current.x, targetPosition.current.x, lerpFactor);
     currentPosition.current.y = lerp(currentPosition.current.y, targetPosition.current.y, lerpFactor);
     currentPosition.current.z = lerp(currentPosition.current.z, targetPosition.current.z, lerpFactor);
-
     currentScale.current = lerp(currentScale.current, targetScale.current, lerpFactor);
 
     groupRef.current.position.copy(currentPosition.current);
@@ -96,31 +101,32 @@ function Icon({ index, item, focusColRef, focusSubRowRef, shaders }) {
     if (materialRef.current) {
       materialRef.current.uniforms.u_selected.value = isSelected ? 1.0 : 0.0;
       materialRef.current.uniforms.u_opacity.value = isSelected ? 0.8 : 0.5;
+      materialRef.current.uniforms.u_cameraPosition.value.copy(state.camera.position);
     }
-
-    materialRef.current.uniforms.u_cameraPosition.value.copy(state.camera.position);
   }, -1);
 
   return (
-    <group ref={groupRef}>
+    <>
       <mesh ref={meshRef} position={[0, 0.045, 0]} renderOrder={2}>
-        <planeGeometry args={[0.18, 0.18] }/>
-        <shaderMaterial 
+        <planeGeometry args={[0.18, 0.18]} />
+        <shaderMaterial
           ref={materialRef}
           vertexShader={shaders.vertex}
           fragmentShader={shaders.fragment}
           uniforms={{
-            u_normData: {value: texture},
-            u_opacity: {value: 0.5},
-            u_selected: {value: 0.0},
-            u_cameraPosition: {value: new THREE.Vector3()},
+            u_normData: { value: texture },
+            u_opacity: { value: 0.5 },
+            u_selected: { value: 0.0 },
+            u_cameraPosition: { value: new THREE.Vector3() },
           }}
           transparent
           depthWrite={false}
           depthTest={false}
         />
       </mesh>
-      <Html ref={htmlRef} position={[0, -0.045, 0]}
+      <Html
+        ref={htmlRef}
+        position={[0, -0.045, 0]}
         center
         style={{
           opacity: 0,
@@ -134,11 +140,35 @@ function Icon({ index, item, focusColRef, focusSubRowRef, shaders }) {
       >
         {item.label}
       </Html>
-      {item.items?.length > 0 && (
+    </>
+  );
+}, iconBodyPropsAreEqual);
+
+function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusColRef, focusSubRowRef, shaders }) {
+  const groupRef = useRef();
+  const isActive = index === focusCol;
+  const isExiting = exitingCols.includes(index);
+  const showSubMenu = item.items?.length > 0 && (isActive || isExiting);
+
+  const handleExitComplete = useCallback(() => {
+    removingExitingCols(index);
+  }, [removingExitingCols, index]);
+
+  return (
+    <group ref={groupRef}>
+      <IconBody
+        index={index}
+        item={item}
+        groupRef={groupRef}
+        focusColRef={focusColRef}
+        shaders={shaders}
+      />
+      {showSubMenu && (
         <VerticalSubMenu
           items={item.items}
-          parentColIndex={index}
-          focusColRef={focusColRef}
+          colIndex={index}
+          mode={isActive ? 'active' : 'exiting'}
+          onExitComplete={handleExitComplete}
           focusSubRowRef={focusSubRowRef}
           shaders={shaders}
         />
@@ -147,14 +177,20 @@ function Icon({ index, item, focusColRef, focusSubRowRef, shaders }) {
   );
 }
 
-export function NavIcons({ focusColRef, focusSubRowRef }) {
+export const NavIcons = memo(function NavIcons({
+  focusCol,
+  exitingCols,
+  removingExitingCols,
+  focusColRef,
+  focusSubRowRef,
+}) {
   const [shaders, setShaders] = useState(null);
 
   useEffect(() => {
     Promise.all([
       fetch('/shaders/icon-vertex.glsl').then((res) => res.text()),
       fetch('/shaders/icon-fragment.glsl').then((res) => res.text()),
-    ]).then(([vertex, fragment]) => setShaders({vertex, fragment}));
+    ]).then(([vertex, fragment]) => setShaders({ vertex, fragment }));
   }, []);
 
   if (!shaders) return null;
@@ -169,8 +205,11 @@ export function NavIcons({ focusColRef, focusSubRowRef }) {
           focusColRef={focusColRef}
           focusSubRowRef={focusSubRowRef}
           shaders={shaders}
+          focusCol={focusCol}
+          exitingCols={exitingCols}
+          removingExitingCols={removingExitingCols}
         />
       ))}
     </Suspense>
   );
-}
+});

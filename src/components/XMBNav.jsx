@@ -4,7 +4,7 @@ import './XMBNav.css';
 
 export const navData = navItems;
 
-function XMBNav({ focusColRef, focusSubRowRef }) {
+function XMBNav({ focusColRef, focusSubRowRef, navigateToCol }) {
   const pendingNavigationRef = useRef(null);
 
   useEffect(() => {
@@ -14,33 +14,35 @@ function XMBNav({ focusColRef, focusSubRowRef }) {
       const col = focusColRef.current.value;
       const subItems = navItems[col]?.items ?? [];
       const maxSubRow = Math.max(0, subItems.length - 1);
+      const getSubRow = () => focusSubRowRef?.current?.values?.[col] ?? 0;
+      const setSubRow = (val) => {
+        if (focusSubRowRef?.current?.values) focusSubRowRef.current.values[col] = val;
+      };
 
       switch (e.key) {
         case 'ArrowLeft':
           e.preventDefault();
-          focusColRef.current.value = Math.max(0, col - 1);
-          if (focusSubRowRef?.current) focusSubRowRef.current.value = 0;
+          navigateToCol(Math.max(0, col - 1));
           break;
         case 'ArrowRight':
           e.preventDefault();
-          focusColRef.current.value = Math.min(navItems.length - 1, col + 1);
-          if (focusSubRowRef?.current) focusSubRowRef.current.value = 0;
+          navigateToCol(Math.min(navItems.length - 1, col + 1));
           break;
         case 'ArrowUp':
           if (!focusSubRowRef?.current || subItems.length === 0) return;
           e.preventDefault();
-          focusSubRowRef.current.value = Math.max(0, focusSubRowRef.current.value - 1);
+          setSubRow(Math.max(0, getSubRow() - 1));
           break;
         case 'ArrowDown':
           if (!focusSubRowRef?.current || subItems.length === 0) return;
           e.preventDefault();
-          focusSubRowRef.current.value = Math.min(maxSubRow, focusSubRowRef.current.value + 1);
+          setSubRow(Math.min(maxSubRow, getSubRow() + 1));
           break;
         case 'Enter':
         case ' ':
           e.preventDefault();
           {
-            const subItem = subItems[focusSubRowRef?.current?.value ?? 0];
+            const subItem = subItems[getSubRow()];
             const item = navItems[col];
             const href = subItem?.href ?? item?.href;
             if (href) {

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
@@ -24,13 +24,11 @@ function lerp(start, end, t) {
   return start + (end - start) * t;
 }
 
-function SubItem({ index, item, parentColIndex, focusColRef, focusSubRowRef, shaders }) {
+const SubItem = memo(function SubItem({ index, item, colIndex, masterOpacity, focusSubRowRef, shaders }) {
   const groupRef = useRef();
   const meshRef = useRef();
   const materialRef = useRef();
   const htmlRef = useRef();
-  const currentOpacity = useRef(0);
-  const wasActiveParent = useRef(false);
 
   const texture = useLoader(THREE.TextureLoader, item.image ?? DEFAULT_SUB_ICON);
 
@@ -39,39 +37,24 @@ function SubItem({ index, item, parentColIndex, focusColRef, focusSubRowRef, sha
   }, [texture]);
 
   useFrame((state, delta) => {
-    if (!groupRef.current || !focusColRef.current) return;
+    if (!groupRef.current) return;
 
-    const focusCol = focusColRef.current.value;
-    const focusSubRow = focusSubRowRef?.current?.value ?? 0;
-    const isActiveParent = parentColIndex === focusCol;
-    const isSelected = isActiveParent && index === focusSubRow;
-    const rowOffset = isActiveParent ? index - focusSubRow : index;
+    const focusSubRow = focusSubRowRef?.current?.values?.[colIndex] ?? 0;
+    const isSelected = index === focusSubRow;
+    const rowOffset = index - focusSubRow;
 
     groupRef.current.position.y = getRowY(rowOffset);
 
-    const targetOpacity = isActiveParent ? (isSelected ? 0.8 : 0.45) : 0;
-    const lerpFactor = Math.min(delta * 8, 1);
-
-    if (isActiveParent && !wasActiveParent.current) {
-      currentOpacity.current = 0;
-    }
-    wasActiveParent.current = isActiveParent;
-
-    if (!isActiveParent) {
-      currentOpacity.current = 0;
-    } else {
-      currentOpacity.current = lerp(currentOpacity.current, targetOpacity, lerpFactor);
-    }
-
-    groupRef.current.visible = currentOpacity.current > 0.01;
+    const itemOpacity = isSelected ? 0.8 : 0.5;
+    const finalOpacity = itemOpacity * masterOpacity.current;
 
     if (htmlRef.current) {
-      htmlRef.current.style.opacity = String(currentOpacity.current);
+      htmlRef.current.style.opacity = String(finalOpacity);
     }
 
     if (materialRef.current) {
       materialRef.current.uniforms.u_selected.value = isSelected ? 1.0 : 0.0;
-      materialRef.current.uniforms.u_opacity.value = currentOpacity.current;
+      materialRef.current.uniforms.u_opacity.value = finalOpacity;
       materialRef.current.uniforms.u_cameraPosition.value.copy(state.camera.position);
     }
   });
@@ -113,9 +96,30 @@ function SubItem({ index, item, parentColIndex, focusColRef, focusSubRowRef, sha
       </Html>
     </group>
   );
-}
+});
 
-export function VerticalSubMenu({ items, parentColIndex, focusColRef, focusSubRowRef, shaders }) {
+export const VerticalSubMenu = memo(function VerticalSubMenu({
+  items,
+  colIndex,
+  mode,
+  onExitComplete,
+  focusSubRowRef,
+  shaders,
+}) {
+  const masterOpacity = useRef(mode === 'active' ? 0 : 1);
+  const didComplete = useRef(false);
+
+  useFrame((_, delta) => {
+    const target = mode === 'active' ? 1 : 0;
+    const lerpFactor = Math.min(delta * 8, 1);
+    masterOpacity.current = lerp(masterOpacity.current, target, lerpFactor);
+
+    if (mode === 'exiting' && masterOpacity.current <= 0.01 && !didComplete.current) {
+      didComplete.current = true;
+      onExitComplete?.();
+    }
+  });
+
   if (!items?.length || !shaders) return null;
 
   return (
@@ -125,12 +129,12 @@ export function VerticalSubMenu({ items, parentColIndex, focusColRef, focusSubRo
           key={index}
           index={index}
           item={item}
-          parentColIndex={parentColIndex}
-          focusColRef={focusColRef}
+          colIndex={colIndex}
+          masterOpacity={masterOpacity}
           focusSubRowRef={focusSubRowRef}
           shaders={shaders}
         />
       ))}
     </>
   );
-}
+});

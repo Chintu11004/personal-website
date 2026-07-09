@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, memo } from 'react';
 import { useThree } from '@react-three/fiber';
 import { OrthographicCamera } from '@react-three/drei';
 import { BackgroundRibbon } from './BackgroundRibbon';
@@ -11,7 +11,7 @@ const CAMERA = {
   zoom: 6.264789413459975,
 };
 
-export function Scene({ focusColRef, focusSubRowRef }) {
+export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, focusCol, exitingCols, removingExitingCols }) {
   const size = useThree((state) => state.size);
   const camera = useThree((state) => state.camera);
   const aspect = size.width / size.height;
@@ -37,7 +37,7 @@ export function Scene({ focusColRef, focusSubRowRef }) {
         far={1000}
       />
       <BackgroundRibbon />
-      <NavIcons focusColRef={focusColRef} focusSubRowRef={focusSubRowRef}/>
+      <NavIcons focusCol={focusCol} exitingCols={exitingCols} removingExitingCols={removingExitingCols} focusColRef={focusColRef} focusSubRowRef={focusSubRowRef}/>
     </>
   );
-}
+});
