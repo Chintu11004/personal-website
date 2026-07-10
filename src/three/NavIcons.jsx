@@ -15,9 +15,9 @@ export const navItems = [
     label: 'Photo Projects',
     image: '/icons/03.png',
     items: [
-      { label: 'University of Wisocnsin-Madison Campus' },
-      { label: 'Dream Simulator' },
-      { label: 'UW Arboretum' },
+      { label: 'University of Wisocnsin-Madison Campus', type: 'folder' },
+      { label: 'Dream Simulator', type: 'launcher' },
+      { label: 'UW Arboretum', type: 'folder' },
     ],
   },
   { label: 'SWE', image: '/icons/23.png' },
@@ -36,7 +36,7 @@ export const navItems = [
 const LAYOUT = {
   spacing: 0.33,
   verticalOffset: 0.32,
-  depthSelect_OffsetX: -0.45,
+  depthSelect_OffsetX: -0.37,
   depthUnselect_OffsetX: -0.2
 };
 
@@ -103,7 +103,7 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, na
     const depth = navDepthRef?.current?.value ?? 0;
     const t = lerpFactor(delta);
 
-    targetPosition.current.set((colOffset * LAYOUT.spacing) - 0.69, LAYOUT.verticalOffset, 0);
+    targetPosition.current.set((colOffset * LAYOUT.spacing) - 0.64, LAYOUT.verticalOffset, 0);
 
     currentPosition.current.x = lerp(currentPosition.current.x, targetPosition.current.x, t);
     currentPosition.current.y = lerp(currentPosition.current.y, targetPosition.current.y, t);

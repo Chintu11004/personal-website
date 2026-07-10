@@ -1,0 +1,83 @@
+import { memo, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
+import { navItems } from './NavIcons';
+import { lerp, lerpFactor } from './utils/animation';
+import './ContentPanel.css';
+
+export const IDLE_DELAY = 1.0;
+export const HIDDEN_OFFSET_X = 0.12;
+
+// Focused icon (-0.69, 0.32) + selected submenu local (-0.37, -0.27) + panel offset (0.85, 0)
+const POSITION = [0.28, -0.21, 0];
+
+export function getSelectionFingerprint(focusColRef, focusSubRowRef) {
+  const col = focusColRef?.current?.value ?? 0;
+  const subRow = focusSubRowRef?.current?.values?.[col] ?? 0;
+  return `${col}:${subRow}`;
+}
+
+export function getFocusedSubItem(focusColRef, focusSubRowRef) {
+  const col = focusColRef?.current?.value ?? 0;
+  const subRow = focusSubRowRef?.current?.values?.[col] ?? 0;
+  return navItems[col]?.items?.[subRow] ?? null;
+}
+
+export function isLauncherIdleCandidate(focusColRef, focusSubRowRef) {
+  const col = focusColRef?.current?.value ?? 0;
+  const items = navItems[col]?.items;
+  if (!items?.length) return false;
+  return getFocusedSubItem(focusColRef, focusSubRowRef)?.type === 'launcher';
+}
+
+export const ContentPanel = memo(function ContentPanel({ focusColRef, focusSubRowRef }) {
+  const groupRef = useRef();
+  const htmlRef = useRef();
+  const opacity = useRef(0);
+  const slideX = useRef(HIDDEN_OFFSET_X);
+  const idleTime = useRef(0);
+  const lastFingerprint = useRef('');
+
+  useFrame((_, delta) => {
+    // idle timer + visibility lerp
+    const fingerprint = getSelectionFingerprint(focusColRef, focusSubRowRef);
+    if (fingerprint !== lastFingerprint.current) {
+      lastFingerprint.current = fingerprint;
+      idleTime.current = 0;
+    }
+
+    if (isLauncherIdleCandidate(focusColRef, focusSubRowRef)) {
+      idleTime.current = Math.min(idleTime.current + delta, IDLE_DELAY);
+    }
+    else {
+      idleTime.current = 0;
+    }
+
+    const shouldShow = idleTime.current >= IDLE_DELAY;
+    groupRef.current?.position.set(
+      POSITION[0] + slideX.current,
+      POSITION[1],
+      POSITION[2]
+    );
+
+    const t = lerpFactor(delta);
+
+    opacity.current = lerp(opacity.current, shouldShow ? 1 : 0, t);
+    slideX.current = lerp(slideX.current, shouldShow ? 0 : HIDDEN_OFFSET_X, t);
+
+    if (htmlRef.current) htmlRef.current.style.opacity = String(opacity.current);
+  });
+
+  return (
+    <group ref={groupRef}>
+      <Html ref={htmlRef} center style={{ opacity: 0 }}>
+        <div className="content-panel">
+          <div className="content-panel__fill" />
+          <div className="content-panel__line content-panel__line--top" />
+          <div className="content-panel__line content-panel__line--bottom" />
+          <div className="content-panel__body" />
+        </div>
+      </Html>
+    </group>
+  );
+});

@@ -1,0 +1,53 @@
+.content-panel {
+  position: relative;
+  width: 54vw;
+  min-height: 48vh;
+  pointer-events: none;
+  user-select: none;
+}
+
+.content-panel__fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.04) 75%,
+    transparent 100%
+  );
+}
+
+.content-panel__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.0) 0%,
+    rgba(255, 255, 255, 0.8) 25%,
+    rgba(255, 255, 255, 1.0) 50%,
+    rgba(255, 255, 255, 0.8) 75%,
+    rgba(255, 255, 255, 0.0) 100%,
+    transparent 100%
+  );
+}
+
+.content-panel__line--top {
+  top: 0;
+}
+
+.content-panel__line--bottom {
+  bottom: 0;
+}
+
+.content-panel__body {
+  position: relative;
+  padding: 14px 24px;
+  color: white;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 13px;
+}

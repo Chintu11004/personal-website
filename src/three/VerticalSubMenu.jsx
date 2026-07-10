@@ -7,19 +7,19 @@ import { SELECTION, useSelectionAnimation } from './hooks/useSelectionAnimation'
 import { lerp, lerpFactor } from './utils/animation';
 
 const LAYOUT = {
-  spacing: 0.2,
-  startY: -0.2,
-  aboveInitialOffset: 0.4,
+  spacing: 0.24,
+  startY: -0.27,
+  aboveInitialOffset: 0.53,
   iconSize: 0.12,
   iconTextGap: 0.06,
-  depthSelectOffsetX: -0.45,
-  depthUnselectOffsetX: -0.2
+  depthSelectOffsetX: -0.37,
+  depthUnselectOffsetX: -0.17,
 };
 
 const SUB_SELECTION = {
   selectedScale: 1.1,
-  unselectedScale: 0.95,
-  depthUnselectedScale: 0.55,
+  unselectedScale: 0.55,
+  depthUnselectedScale: 0.4,
   labelSelectedOpacity: SELECTION.selectedOpacity,
   labelUnselectedOpacity: SELECTION.unselectedOpacity,
   depthUnselectedLabelOpacity: 0,

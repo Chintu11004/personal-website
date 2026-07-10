@@ -2,6 +2,7 @@ import { useLayoutEffect, memo } from 'react';
 import { useThree } from '@react-three/fiber';
 import { OrthographicCamera } from '@react-three/drei';
 import { BackgroundRibbon } from './BackgroundRibbon';
+import { ContentPanel } from './ContentPanel';
 import { NavIcons } from './NavIcons';
 
 const CAMERA = {
@@ -37,6 +38,10 @@ export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDept
         far={1000}
       />
       <BackgroundRibbon />
+      <ContentPanel
+        focusColRef={focusColRef}
+        focusSubRowRef={focusSubRowRef}
+      />
       <NavIcons
         focusCol={focusCol}
         exitingCols={exitingCols}
