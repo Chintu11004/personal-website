@@ -1,7 +1,7 @@
-import { memo, useRef } from 'react';
+import { memo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
-import { navItems } from './NavIcons';
+import { navItems } from './navItems';
 import { lerp, lerpFactor } from './utils/animation';
 import './ContentPanel.css';
 
@@ -37,6 +37,7 @@ export const ContentPanel = memo(function ContentPanel({ focusColRef, focusSubRo
   const slideX = useRef(HIDDEN_OFFSET_X);
   const idleTime = useRef(0);
   const lastFingerprint = useRef('');
+  const [content, setContent] = useState(null);
 
   useFrame((_, delta) => {
     // idle timer + visibility lerp
@@ -44,6 +45,7 @@ export const ContentPanel = memo(function ContentPanel({ focusColRef, focusSubRo
     if (fingerprint !== lastFingerprint.current) {
       lastFingerprint.current = fingerprint;
       idleTime.current = 0;
+      setContent(getFocusedSubItem(focusColRef, focusSubRowRef)?.content ?? null);
     }
 
     if (isLauncherIdleCandidate(focusColRef, focusSubRowRef)) {
@@ -75,7 +77,26 @@ export const ContentPanel = memo(function ContentPanel({ focusColRef, focusSubRo
           <div className="content-panel__fill" />
           <div className="content-panel__line content-panel__line--top" />
           <div className="content-panel__line content-panel__line--bottom" />
-          <div className="content-panel__body" />
+          <div className="content-panel__body">
+            {content && (
+              <>
+                <h2 className="content-panel__title">{content.title}</h2>
+                <p className="content-panel__desc">{content.description}</p>
+                {content.images?.length > 0 && (
+                  <div className="content-panel__images">
+                    {content.images.map((src) => (
+                      <img
+                        key={src}
+                        className="content-panel__image"
+                        src={src}
+                        alt=""
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </Html>
     </group>

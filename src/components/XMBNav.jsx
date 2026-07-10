@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { navItems } from '../three/NavIcons';
+import { navItems } from '../three/navItems';
 import './XMBNav.css';
 
 export const navData = navItems;

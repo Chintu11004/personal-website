@@ -7,31 +7,7 @@ import { IconLabel } from './IconLabel';
 import { useIconShaders } from './hooks/useIconShaders';
 import { SELECTION, useSelectionAnimation } from './hooks/useSelectionAnimation';
 import { lerp, lerpFactor } from './utils/animation';
-
-export const navItems = [
-  { label: 'User', image: '/icons/01.png' },
-  { label: 'Settings', image: '/icons/02.png' },
-  {
-    label: 'Photo Projects',
-    image: '/icons/03.png',
-    items: [
-      { label: 'University of Wisocnsin-Madison Campus', type: 'folder' },
-      { label: 'Dream Simulator', type: 'launcher' },
-      { label: 'UW Arboretum', type: 'folder' },
-    ],
-  },
-  { label: 'SWE', image: '/icons/23.png' },
-  {
-    label: 'Games',
-    image: '/icons/06.png',
-    items: [
-      { label: 'Tron: Jump-Man' },
-      { label: 'Jungle Warriors' },
-    ],
-  },
-  { label: 'Contact Me', image: '/icons/07.png' },
-  { label: 'Friends', image: '/icons/08.png' },
-];
+import { navItems } from './navItems';
 
 const LAYOUT = {
   spacing: 0.33,

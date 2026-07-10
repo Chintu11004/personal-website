@@ -3,7 +3,7 @@ import { Scene } from './three/Scene';
 import XMBNav from './components/XMBNav';
 import './App.css';
 import { useCallback, useRef, useState } from 'react';
-import { navItems } from './three/NavIcons';
+import { navItems } from './three/navItems';
 
 function App() {
   const [focusCol, setFocusCol] = useState(4);
