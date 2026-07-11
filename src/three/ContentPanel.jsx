@@ -30,7 +30,7 @@ export function isLauncherIdleCandidate(focusColRef, focusSubRowRef) {
   return getFocusedSubItem(focusColRef, focusSubRowRef)?.type === 'launcher';
 }
 
-export const ContentPanel = memo(function ContentPanel({ focusColRef, focusSubRowRef }) {
+export const ContentPanel = memo(function ContentPanel({ focusColRef, focusSubRowRef, contentPanelVisibleRef }) {
   const groupRef = useRef();
   const htmlRef = useRef();
   const opacity = useRef(0);
@@ -66,6 +66,10 @@ export const ContentPanel = memo(function ContentPanel({ focusColRef, focusSubRo
 
     opacity.current = lerp(opacity.current, shouldShow ? 1 : 0, t);
     slideX.current = lerp(slideX.current, shouldShow ? 0 : HIDDEN_OFFSET_X, t);
+
+    if (contentPanelVisibleRef?.current) {
+      contentPanelVisibleRef.current.value = opacity.current;
+    }
 
     if (htmlRef.current) htmlRef.current.style.opacity = String(opacity.current);
   });

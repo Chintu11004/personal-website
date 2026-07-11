@@ -9,13 +9,18 @@ export const navItems = [
       {
         label: 'Dream Simulator',
         type: 'launcher',
+        thumbnail: 'custom',
+        widthOfTB: 1.8,
+        heightOfTB: 1,
         image: '/images/photos/dream_sim/artist-card.jpg',
         content: {
           title: 'Dream Simulator',
           description: `  The world tends to be a bit selfish and unfair – it takes and takes more of whatever work you put in it, only for you to get pennies on the dollar. People love underdog stories because they let you believe you can “win,” but most of the time you don’t. That’s normal. That’s life.
   “Dream Simulator” aims to tell the story of an unsuspecting traveler who spent too much time in the arboretum and has been pulled into the consciousness of the forest, simply because it was the forest’s nature and purpose to assimilate.`,
           images: [
-            '/images/photos/dream_sim/artist-card.jpg',
+            '/images/photos/dream_sim/01.jpg',
+            '/images/photos/dream_sim/05.jpg',
+            '/images/photos/dream_sim/06.jpg',
           ],
         },
       },

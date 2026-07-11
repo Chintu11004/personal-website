@@ -100,7 +100,7 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, na
     <group ref={contentRef}>
       <IconShaderMesh
         texture={texture}
-        shaders={shaders}
+        shaders={shaders.normal}
         size={0.18}
         position={[0, 0.045, 0]}
         meshRef={meshRef}
@@ -116,7 +116,7 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, na
   );
 }, iconBodyPropsAreEqual);
 
-function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusColRef, focusSubRowRef, navDepthRef, shaders }) {
+function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, shaders }) {
   const groupRef = useRef();
   const isActive = index === focusCol;
   const isExiting = exitingCols.includes(index);
@@ -145,6 +145,7 @@ function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusCo
           focusSubRowRef={focusSubRowRef}
           focusColRef={focusColRef}
           navDepthRef={navDepthRef}
+          contentPanelVisibleRef={contentPanelVisibleRef}
           shaders={shaders}
         />
       )}
@@ -159,10 +160,11 @@ export const NavIcons = memo(function NavIcons({
   focusColRef,
   focusSubRowRef,
   navDepthRef,
+  contentPanelVisibleRef,
 }) {
   const shaders = useIconShaders();
 
-  if (!shaders) return null;
+  if (!shaders?.normal || !shaders?.thumbnail) return null;
 
   return (
     <Suspense fallback={null}>
@@ -174,6 +176,7 @@ export const NavIcons = memo(function NavIcons({
           focusColRef={focusColRef}
           focusSubRowRef={focusSubRowRef}
           navDepthRef={navDepthRef}
+          contentPanelVisibleRef={contentPanelVisibleRef}
           shaders={shaders}
           focusCol={focusCol}
           exitingCols={exitingCols}

@@ -11,6 +11,7 @@ function App() {
   const focusColRef = useRef({value: 4});
   const focusSubRowRef = useRef({ values: navItems.map(() => 0) });
   const navDepthRef = useRef({ value: 0 });
+  const contentPanelVisibleRef = useRef({ value: 0 });
 
   const removingExitingCol = useCallback((colIndex) => {
     setExitingCols((prev) => prev.filter((c) => c !== colIndex));
@@ -49,6 +50,7 @@ function App() {
           focusColRef={focusColRef}
           focusSubRowRef={focusSubRowRef}
           navDepthRef={navDepthRef}
+          contentPanelVisibleRef={contentPanelVisibleRef}
           focusCol={focusCol}
           exitingCols={exitingCols}
           removingExitingCols={removingExitingCol}

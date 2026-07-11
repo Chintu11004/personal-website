@@ -1,6 +1,7 @@
 .content-panel {
   position: relative;
   width: 54vw;
+  height: 48vh;
   min-height: 48vh;
   pointer-events: none;
   user-select: none;
@@ -12,9 +13,12 @@
   background: linear-gradient(
     to right,
     transparent 0%,
-    rgba(255, 255, 255, 0.04) 25%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.04) 75%,
+    rgba(0, 0, 0, 0.0) 0%,
+    rgba(0, 0, 0, 0.6) 25%,
+    rgba(0, 0, 0, 0.75) 50%,
+    rgba(0, 0, 0, 0.6) 75%,
+    rgba(0, 0, 0, 0.0) 100%,
+
     transparent 100%
   );
 }
@@ -45,11 +49,18 @@
 }
 
 .content-panel__body {
+  display: flex;
+  flex-direction: column;
   position: relative;
-  padding: 20px 28px;
   color: white;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 13px;
+  min-height: 0;
+  height: 100%;
+  grid-template-rows: 10% 45% 45%;
+  padding-top: 20px;
+  padding-inline: 28px;
+  padding-bottom: 0;
 }
 
 .content-panel__title {
@@ -80,10 +91,9 @@
 .content-panel__image {
   flex: 1;
   min-width: 0;
-  max-height: 18vh;
-  width: 100%;
-  height: auto;
+  width: auto;
+  height: 100%;
   object-fit: contain;
   object-position: center bottom;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  filter: drop-shadow(0 4px 32px rgba(0,0,0, 0.35));
 }

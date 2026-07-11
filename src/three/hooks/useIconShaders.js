@@ -7,7 +7,13 @@ export function useIconShaders() {
     Promise.all([
       fetch('/shaders/icon-vertex.glsl').then((res) => res.text()),
       fetch('/shaders/icon-fragment.glsl').then((res) => res.text()),
-    ]).then(([vertex, fragment]) => setShaders({ vertex, fragment }));
+      fetch('/shaders/icon-thumbnail-fragment.glsl').then((res) => res.text()),
+    ]).then(([vertex, normalFragment, thumbnailFragment]) => {
+      setShaders({
+        normal: { vertex, fragment: normalFragment },
+        thumbnail: { vertex, fragment: thumbnailFragment },
+      });
+    });
   }, []);
 
   return shaders;
