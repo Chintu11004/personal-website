@@ -5,7 +5,7 @@ import * as THREE from 'three';
 const PLANE_WIDTH = 4;
 const PLANE_HEIGHT = 1;
 
-export function BackgroundRibbon() {
+export function BackgroundRibbon({ contentPanelVisibleRef }) {
   const materialRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
@@ -44,6 +44,7 @@ export function BackgroundRibbon() {
             u_displacement: { value: 0.8 },
             u_amplitude: { value: 0.3 },
             u_planeWidth: { value: PLANE_WIDTH },
+            u_opacity: { value: 1.0 },
           },
           vertexShader,
           fragmentShader,
@@ -54,6 +55,7 @@ export function BackgroundRibbon() {
         geometry = new THREE.PlaneGeometry(PLANE_WIDTH, PLANE_HEIGHT, 64, 64);
         mesh = new THREE.Mesh(geometry, material);
         mesh.rotation.x = -Math.PI / 2;
+        mesh.renderOrder = 0;
         activeScene.add(mesh);
         materialRef.current = material;
       });
@@ -73,9 +75,12 @@ export function BackgroundRibbon() {
   }, []);
 
   useFrame((state) => {
-    if (materialRef.current) {
-      materialRef.current.uniforms.u_time.value = state.clock.elapsedTime;
-    }
+    if (!materialRef.current) return;
+
+    materialRef.current.uniforms.u_time.value = state.clock.elapsedTime;
+
+    const panelVisible = contentPanelVisibleRef?.current?.value ?? 0;
+    materialRef.current.uniforms.u_opacity.value = 1 - panelVisible;
   });
 
   return null;

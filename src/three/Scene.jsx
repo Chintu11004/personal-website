@@ -3,14 +3,9 @@ import { useThree } from '@react-three/fiber';
 import { OrthographicCamera } from '@react-three/drei';
 import { BackgroundRibbon } from './BackgroundRibbon';
 import { ContentPanel } from './ContentPanel';
+import { ContentPanelBackground } from './ContentPanelBackground';
 import { NavIcons } from './NavIcons';
-
-const CAMERA = {
-  frustumSize: 10,
-  position: [-0.09479328005746984, 0.01034594383217302, 2.230247723145003],
-  target: [0, 0, 0],
-  zoom: 6.264789413459975,
-};
+import { CAMERA } from './cameraConfig';
 
 export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, focusCol, exitingCols, removingExitingCols }) {
   const size = useThree((state) => state.size);
@@ -37,7 +32,12 @@ export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDept
         near={0.1}
         far={1000}
       />
-      <BackgroundRibbon />
+      <BackgroundRibbon contentPanelVisibleRef={contentPanelVisibleRef} />
+      <ContentPanelBackground
+        focusColRef={focusColRef}
+        focusSubRowRef={focusSubRowRef}
+        contentPanelVisibleRef={contentPanelVisibleRef}
+      />
       <ContentPanel
         focusColRef={focusColRef}
         focusSubRowRef={focusSubRowRef}

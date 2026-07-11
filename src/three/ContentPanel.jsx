@@ -72,7 +72,7 @@ export const ContentPanel = memo(function ContentPanel({ focusColRef, focusSubRo
     }
 
     if (htmlRef.current) htmlRef.current.style.opacity = String(opacity.current);
-  });
+  }, -1);
 
   return (
     <group ref={groupRef}>
