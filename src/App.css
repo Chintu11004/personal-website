@@ -1,7 +1,7 @@
 /* App-level styles - container is handled separately */
 
 :root {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--font-sans);
   color-scheme: dark;
 }
 

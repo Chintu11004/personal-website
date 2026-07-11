@@ -3,7 +3,7 @@ import { Html } from '@react-three/drei';
 
 const LABEL_STYLE = {
   color: 'white',
-  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+  fontFamily: 'var(--font-sans)',
   whiteSpace: 'nowrap',
   pointerEvents: 'none',
   userSelect: 'none',
