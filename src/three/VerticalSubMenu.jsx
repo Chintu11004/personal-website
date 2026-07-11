@@ -2,6 +2,7 @@ import { memo, useEffect, useLayoutEffect, useRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { IconShaderMesh } from './IconShaderMesh';
+import { ThumbnailIconMesh } from './ThumbnailIconMesh';
 import { IconLabel } from './IconLabel';
 import { SELECTION, useSelectionAnimation } from './hooks/useSelectionAnimation';
 import { lerp, lerpFactor } from './utils/animation';
@@ -34,6 +35,13 @@ function getRowY(rowOffset) {
   return LAYOUT.startY + LAYOUT.aboveInitialOffset + (-rowOffset - 1) * LAYOUT.spacing;
 }
 
+function getThumbnailSize(item) {
+  const base = LAYOUT.iconSize;
+  const width = item.widthOfTB != null ? base * Number(item.widthOfTB) : base;
+  const height = item.heightOfTB != null ? base * Number(item.heightOfTB) : base;
+  return [width, height];
+}
+
 function subItemPropsAreEqual(prev, next) {
   return (
     prev.index === next.index &&
@@ -43,6 +51,7 @@ function subItemPropsAreEqual(prev, next) {
     prev.focusSubRowRef === next.focusSubRowRef &&
     prev.focusColRef === next.focusColRef &&
     prev.navDepthRef === next.navDepthRef &&
+    prev.contentPanelVisibleRef === next.contentPanelVisibleRef &&
     prev.shaders === next.shaders
   );
 }
@@ -55,11 +64,16 @@ const SubItem = memo(function SubItem({
   focusSubRowRef,
   focusColRef,
   navDepthRef,
+  contentPanelVisibleRef,
   shaders,
 }) {
+  const isCustomThumbnail = item.thumbnail === 'custom';
+  const activeShaders = isCustomThumbnail ? shaders.thumbnail : shaders.normal;
+  const thumbnailSize = isCustomThumbnail ? getThumbnailSize(item) : [LAYOUT.iconSize, LAYOUT.iconSize];
   const focusSubRow = focusSubRowRef?.current?.values?.[colIndex] ?? 0;
-  const initialY = getRowY(index - focusSubRow);
   const isSelected = index === focusSubRow;
+  const baseLabelX = isCustomThumbnail ? thumbnailSize[0] / 2 : LAYOUT.iconTextGap;
+  const initialY = getRowY(index - focusSubRow);
   const initialScale = isSelected ? SUB_SELECTION.selectedScale : SUB_SELECTION.unselectedScale;
   const initialShaderOpacity = isSelected ? SELECTION.selectedOpacity : SELECTION.unselectedOpacity;
   const initialLabelOpacity = initialShaderOpacity;
@@ -68,6 +82,8 @@ const SubItem = memo(function SubItem({
   const meshRef = useRef();
   const materialRef = useRef();
   const htmlRef = useRef();
+  const labelGroupRef = useRef();
+  const currentLabelX = useRef(baseLabelX);
 
   const { step, applyInitial } = useSelectionAnimation({
     meshRef,
@@ -90,7 +106,11 @@ const SubItem = memo(function SubItem({
 
   useLayoutEffect(() => {
     applyInitial();
-  }, [applyInitial]);
+    if (labelGroupRef.current) {
+      labelGroupRef.current.position.set(baseLabelX, 0, 0);
+    }
+    currentLabelX.current = baseLabelX;
+  }, [applyInitial, baseLabelX]);
 
   useFrame((state, delta) => {
     if (!groupRef.current || !meshRef.current) return;
@@ -100,6 +120,24 @@ const SubItem = memo(function SubItem({
     const isFocusCol = (focusColRef?.current?.value ?? 0) === colIndex;
     const depth = navDepthRef?.current?.value ?? 0;
     const entered = isFocusCol && depth > 0;
+    const panelVisible = contentPanelVisibleRef?.current?.value ?? 0;
+
+    let targetLabelOpacity = isSelected
+      ? SUB_SELECTION.labelSelectedOpacity
+      : entered
+        ? SUB_SELECTION.depthUnselectedLabelOpacity
+        : SUB_SELECTION.labelUnselectedOpacity;
+
+    const targetLabelX = baseLabelX + (isSelected ? 0.04 : 0);
+    currentLabelX.current = lerp(currentLabelX.current, targetLabelX, lerpFactor(delta));
+
+    if (labelGroupRef.current) {
+      labelGroupRef.current.position.x = currentLabelX.current;
+    }
+
+    if (panelVisible > 0) {
+      targetLabelOpacity *= 1 - panelVisible;
+    }
 
     step(delta, state.camera.position, {
       isSelected,
@@ -107,28 +145,41 @@ const SubItem = memo(function SubItem({
       targetY: getRowY(index - focusSubRow),
       targetScale: isSelected ? SUB_SELECTION.selectedScale : entered ? SUB_SELECTION.depthUnselectedScale : SUB_SELECTION.unselectedScale,
       targetShaderOpacity: isSelected ? SELECTION.selectedOpacity : entered ? SELECTION.depthUnselectedOpacity + 0.25 : SELECTION.unselectedOpacity,
-      targetLabelOpacity: isSelected ? SUB_SELECTION.labelSelectedOpacity : entered ? SUB_SELECTION.depthUnselectedLabelOpacity : SUB_SELECTION.labelUnselectedOpacity,
+      targetLabelOpacity,
     });
   });
 
   return (
     <group ref={groupRef}>
-      <IconShaderMesh
-        texture={texture}
-        shaders={shaders}
-        size={LAYOUT.iconSize}
-        meshRef={meshRef}
-        materialRef={materialRef}
-        initialOpacity={0}
-      />
-      <IconLabel
-        label={item.label}
-        position={[LAYOUT.iconSize, 0, 0]}
-        htmlRef={htmlRef}
-        fontSize="13px"
-        style={{textAlign:"left", transform: 'translateY(-50%)'}}
-        center
-      />
+      {isCustomThumbnail ? (
+        <ThumbnailIconMesh
+          texture={texture}
+          shaders={activeShaders}
+          size={thumbnailSize}
+          meshRef={meshRef}
+          materialRef={materialRef}
+          initialOpacity={0}
+        />
+      ) : (
+        <IconShaderMesh
+          texture={texture}
+          shaders={activeShaders}
+          size={LAYOUT.iconSize}
+          meshRef={meshRef}
+          materialRef={materialRef}
+          initialOpacity={0}
+        />
+      )}
+      <group ref={labelGroupRef}>
+        <IconLabel
+          label={item.label}
+          position={[0, 0, 0]}
+          htmlRef={htmlRef}
+          fontSize="13px"
+          style={{ textAlign: 'left', transform: 'translateY(-50%)' }}
+          center
+        />
+      </group>
     </group>
   );
 }, subItemPropsAreEqual);
@@ -141,6 +192,7 @@ export const VerticalSubMenu = memo(function VerticalSubMenu({
   focusSubRowRef,
   focusColRef,
   navDepthRef,
+  contentPanelVisibleRef,
   shaders,
 }) {
   const masterOpacity = useRef(mode === 'active' ? 0 : 1);
@@ -156,7 +208,7 @@ export const VerticalSubMenu = memo(function VerticalSubMenu({
     }
   });
 
-  if (!items?.length || !shaders) return null;
+  if (!items?.length || !shaders?.normal || !shaders?.thumbnail) return null;
 
   return (
     <>
@@ -170,6 +222,7 @@ export const VerticalSubMenu = memo(function VerticalSubMenu({
           focusSubRowRef={focusSubRowRef}
           focusColRef={focusColRef}
           navDepthRef={navDepthRef}
+          contentPanelVisibleRef={contentPanelVisibleRef}
           shaders={shaders}
         />
       ))}
