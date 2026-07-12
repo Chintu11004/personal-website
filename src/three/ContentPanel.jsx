@@ -1,8 +1,12 @@
 import { memo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
-import { navItems } from './navItems';
 import { lerp, lerpFactor } from './utils/animation';
+import {
+  getFocusedSubItem,
+  getSelectionFingerprint,
+  isLauncherIdleCandidate,
+} from './utils/selection';
 import './ContentPanel.css';
 
 export const IDLE_DELAY = 2.0;
@@ -10,25 +14,6 @@ export const HIDDEN_OFFSET_X = 0.12;
 
 // Focused icon (-0.69, 0.32) + selected submenu local (-0.37, -0.27) + panel offset (0.85, 0)
 const POSITION = [0.28, -0.21, 0];
-
-export function getSelectionFingerprint(focusColRef, focusSubRowRef) {
-  const col = focusColRef?.current?.value ?? 0;
-  const subRow = focusSubRowRef?.current?.values?.[col] ?? 0;
-  return `${col}:${subRow}`;
-}
-
-export function getFocusedSubItem(focusColRef, focusSubRowRef) {
-  const col = focusColRef?.current?.value ?? 0;
-  const subRow = focusSubRowRef?.current?.values?.[col] ?? 0;
-  return navItems[col]?.items?.[subRow] ?? null;
-}
-
-export function isLauncherIdleCandidate(focusColRef, focusSubRowRef) {
-  const col = focusColRef?.current?.value ?? 0;
-  const items = navItems[col]?.items;
-  if (!items?.length) return false;
-  return getFocusedSubItem(focusColRef, focusSubRowRef)?.type === 'launcher';
-}
 
 export const ContentPanel = memo(function ContentPanel({ focusColRef, focusSubRowRef, contentPanelVisibleRef }) {
   const groupRef = useRef();

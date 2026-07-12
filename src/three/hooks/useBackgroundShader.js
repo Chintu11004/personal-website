@@ -1,16 +1,11 @@
-import { useEffect, useState } from 'react';
+import iconVertex from '../../shaders/icon-vertex.glsl?raw';
+import backgroundFragment from '../../shaders/background-fragment.glsl?raw';
+
+const BACKGROUND_SHADERS = {
+  vertex: iconVertex,
+  fragment: backgroundFragment,
+};
 
 export function useBackgroundShader() {
-  const [shaders, setShaders] = useState(null);
-
-  useEffect(() => {
-    Promise.all([
-      fetch('/shaders/icon-vertex.glsl').then((res) => res.text()),
-      fetch('/shaders/background-fragment.glsl').then((res) => res.text()),
-    ]).then(([vertex, fragment]) => {
-      setShaders({ vertex, fragment });
-    });
-  }, []);
-
-  return shaders;
+  return BACKGROUND_SHADERS;
 }

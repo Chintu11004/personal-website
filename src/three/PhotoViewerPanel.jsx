@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import { PhotoViewer } from '../components/PhotoViewer';
 import { lerp, lerpFactor } from './utils/animation';
-import { getFocusedSubItem, getSelectionFingerprint } from './PhotoGridPanel';
+import { getFocusedSubItem, getSelectionFingerprint } from './utils/selection';
 import './PhotoViewerPanel.css';
 
 const GRID_COLS = 5;

@@ -1,20 +1,12 @@
-import { useEffect, useState } from 'react';
+import iconVertex from '../../shaders/icon-vertex.glsl?raw';
+import iconFragment from '../../shaders/icon-fragment.glsl?raw';
+import iconThumbnailFragment from '../../shaders/icon-thumbnail-fragment.glsl?raw';
+
+const ICON_SHADERS = {
+  normal: { vertex: iconVertex, fragment: iconFragment },
+  thumbnail: { vertex: iconVertex, fragment: iconThumbnailFragment },
+};
 
 export function useIconShaders() {
-  const [shaders, setShaders] = useState(null);
-
-  useEffect(() => {
-    Promise.all([
-      fetch('/shaders/icon-vertex.glsl').then((res) => res.text()),
-      fetch('/shaders/icon-fragment.glsl').then((res) => res.text()),
-      fetch('/shaders/icon-thumbnail-fragment.glsl').then((res) => res.text()),
-    ]).then(([vertex, normalFragment, thumbnailFragment]) => {
-      setShaders({
-        normal: { vertex, fragment: normalFragment },
-        thumbnail: { vertex, fragment: thumbnailFragment },
-      });
-    });
-  }, []);
-
-  return shaders;
+  return ICON_SHADERS;
 }

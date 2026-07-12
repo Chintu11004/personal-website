@@ -1,7 +1,7 @@
 import { memo, Suspense, useEffect, useRef, useState } from 'react';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { getFocusedSubItem, getSelectionFingerprint } from './ContentPanel';
+import { getFocusedSubItem, getSelectionFingerprint } from './utils/selection';
 import { BackgroundImageMesh } from './BackgroundImageMesh';
 import { getOrthoViewportSize } from './cameraConfig';
 import { useBackgroundShader } from './hooks/useBackgroundShader';

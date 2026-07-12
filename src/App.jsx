@@ -40,7 +40,7 @@ function App() {
     <>
       <div className="app-background" aria-hidden="true" />
       <Canvas
-        frameloop="always"
+        frameloop="demand"
         gl={{ antialias: true, alpha: true, premultipliedAlpha: false }}
         onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
         style={{

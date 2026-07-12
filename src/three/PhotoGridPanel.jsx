@@ -1,8 +1,8 @@
 import { memo, useLayoutEffect, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
-import { navItems } from './navItems';
 import { lerp, lerpFactor } from './utils/animation';
+import { getFocusedSubItem, getSelectionFingerprint } from './utils/selection';
 import { FolderConnectorArrow } from '../components/FolderConnectorArrow';
 import { PhotoGrid } from '../components/PhotoGrid';
 import '../components/PhotoGrid.css';
@@ -15,18 +15,6 @@ const GRID_THUMB_HEIGHT = 125;
 
 // Anchors top-left of the grid beside the depth-1 folder icon
 const POSITION = [-0.45, 0.16, 0];
-
-export function getSelectionFingerprint(focusColRef, focusSubRowRef) {
-  const col = focusColRef?.current?.value ?? 0;
-  const subRow = focusSubRowRef?.current?.values?.[col] ?? 0;
-  return `${col}:${subRow}`;
-}
-
-export function getFocusedSubItem(focusColRef, focusSubRowRef) {
-  const col = focusColRef?.current?.value ?? 0;
-  const subRow = focusSubRowRef?.current?.values?.[col] ?? 0;
-  return navItems[col]?.items?.[subRow] ?? null;
-}
 
 export const PhotoGridPanel = memo(function PhotoGridPanel({
   focusColRef,
@@ -42,6 +30,7 @@ export const PhotoGridPanel = memo(function PhotoGridPanel({
   const opacity = useRef(0);
   const slideX = useRef(HIDDEN_OFFSET_X);
   const lastFingerprint = useRef('');
+  const lastGridFocus = useRef({ row: 0, col: 0 });
   const [photos, setPhotos] = useState([]);
   const [gridFocus, setGridFocus] = useState({ row: 0, col: 0 });
   const [anchorTop, setAnchorTop] = useState(0);
@@ -79,13 +68,20 @@ export const PhotoGridPanel = memo(function PhotoGridPanel({
       if (photoViewerOpenRef) {
         photoViewerOpenRef.current = false;
       }
+      lastGridFocus.current = { row: 0, col: 0 };
+      setGridFocus({ row: 0, col: 0 });
     }
 
     const focusedItem = getFocusedSubItem(focusColRef, focusSubRowRef);
     const shouldShow = depth === 1 && focusedItem?.type === 'folder';
 
     if (shouldShow && photoGridFocusRef?.current) {
-      setGridFocus({ row: photoGridFocusRef.current.row, col: photoGridFocusRef.current.col });
+      const nextRow = photoGridFocusRef.current.row;
+      const nextCol = photoGridFocusRef.current.col;
+      if (nextRow !== lastGridFocus.current.row || nextCol !== lastGridFocus.current.col) {
+        lastGridFocus.current = { row: nextRow, col: nextCol };
+        setGridFocus({ row: nextRow, col: nextCol });
+      }
     }
 
     groupRef.current?.position.set(
@@ -107,6 +103,7 @@ export const PhotoGridPanel = memo(function PhotoGridPanel({
     ) {
       photoGridFocusRef.current.row = 0;
       photoGridFocusRef.current.col = 0;
+      lastGridFocus.current = { row: 0, col: 0 };
       setGridFocus({ row: 0, col: 0 });
     }
 
