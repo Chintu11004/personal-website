@@ -1,0 +1,15 @@
+.folder-connector-arrow {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 1),
+    rgba(160, 160, 160, 0.5)
+  );
+  clip-path: polygon(0% 50%, 100% 0%, 100% 100%);
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4));
+}

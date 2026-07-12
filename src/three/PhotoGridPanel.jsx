@@ -3,11 +3,15 @@ import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import { navItems } from './navItems';
 import { lerp, lerpFactor } from './utils/animation';
+import { FolderConnectorArrow } from '../components/FolderConnectorArrow';
 import { PhotoGrid } from '../components/PhotoGrid';
 import '../components/PhotoGrid.css';
 
 export const HIDDEN_OFFSET_X = 0.12;
 const OPACITY_RESET_THRESHOLD = 0.01;
+
+const CONNECTOR_X = -75;
+const GRID_THUMB_HEIGHT = 125;
 
 // Anchors top-left of the grid beside the depth-1 folder icon
 const POSITION = [-0.45, 0.16, 0];
@@ -121,6 +125,10 @@ export const PhotoGridPanel = memo(function PhotoGridPanel({
           className="photo-grid-panel"
           style={{ '--photo-grid-anchor-top': `${anchorTop}px` }}
         >
+          <FolderConnectorArrow
+            x={CONNECTOR_X}
+            y={anchorTop + GRID_THUMB_HEIGHT / 2}
+          />
           <PhotoGrid
             photos={photos}
             focusRow={gridFocus.row}

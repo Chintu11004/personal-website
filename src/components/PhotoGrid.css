@@ -22,6 +22,7 @@
 }
 
 .photo-grid__viewport {
+  position: relative;
   height: 100vh;
   overflow: visible;
   padding-top: var(--photo-grid-anchor-top, 0px);
