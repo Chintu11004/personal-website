@@ -1,6 +1,7 @@
 import { Canvas } from '@react-three/fiber';
 import { Scene } from './three/Scene';
 import XMBNav from './components/XMBNav';
+import Clock from './components/Clock';
 import './App.css';
 import { useCallback, useRef, useState } from 'react';
 import { navItems } from './three/navItems';
@@ -69,6 +70,10 @@ function App() {
         navDepthRef={navDepthRef}
         navigateToCol={navigateToCol}
         photoGridFocusRef={photoGridFocusRef}
+        photoViewerOpenRef={photoViewerOpenRef}
+      />
+      <Clock
+        contentPanelVisibleRef={contentPanelVisibleRef}
         photoViewerOpenRef={photoViewerOpenRef}
       />
     </>
