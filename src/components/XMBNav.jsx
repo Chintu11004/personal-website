@@ -146,11 +146,15 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
           e.preventDefault();
           if (subItems.length > 0 && depth === 0) {
             const subItem = subItems[getSubRow()];
-            // Only enter depth 1 for folders
             if (subItem?.type === 'folder') {
               setDepth(1);
               photoGridFocusRef.current.row = 0;
               photoGridFocusRef.current.col = 0;
+              break;
+            }
+            if (subItem?.type === 'launcher' && subItem?.href) {
+              window.location.href = subItem.href;
+              break;
             }
             break;
           }
@@ -162,7 +166,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
               if (item?.external) {
                 window.open(href, '_blank', 'noopener,noreferrer');
               } else {
-                window.location.hash = href;
+                window.location.href = href;
               }
             }
           }

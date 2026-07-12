@@ -67,7 +67,16 @@ export const navItems = [
     image: '/icons/06.png',
     items: [
       { label: 'Tron: Jump-Man' },
-      { label: 'Jungle Warriors' },
+      {
+        label: 'Jungle Warriors',
+        type: 'launcher',
+        href: '/games/jungle-warrior/index.html',
+        content: {
+          title: 'Jungle Warriors',
+          description:
+            'A Game Boy game created for the Games for Change Game Jam. Explore the rainforest, free animals, and learn about the threats rainforests face around the world.',
+        },
+      },
     ],
   },
   { label: 'Contact Me', image: '/icons/07.png' },
