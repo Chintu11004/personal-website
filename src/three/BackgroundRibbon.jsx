@@ -52,7 +52,7 @@ export function BackgroundRibbon({ contentPanelVisibleRef }) {
           side: THREE.DoubleSide,
         });
 
-        geometry = new THREE.PlaneGeometry(PLANE_WIDTH, PLANE_HEIGHT, 64, 64);
+        geometry = new THREE.PlaneGeometry(PLANE_WIDTH, PLANE_HEIGHT, 128, 128);
         mesh = new THREE.Mesh(geometry, material);
         mesh.rotation.x = -Math.PI / 2;
         mesh.renderOrder = 0;

@@ -14,6 +14,7 @@ export const navItems = [
             '/images/photos/dream_sim/01.jpg',
             '/images/photos/dream_sim/05.jpg',
             '/images/photos/dream_sim/06.jpg',
+            '/images/photos/dream_sim/test.png',
           ];
           const dates = [
             '21/8/2010 9:39',
