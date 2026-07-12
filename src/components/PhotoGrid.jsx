@@ -12,8 +12,7 @@ export const PhotoGrid = memo(function PhotoGrid({ photos, focusRow, focusCol, c
     const measure = () => {
       if (!itemRef.current) return;
 
-      const itemHeight = itemRef.current.offsetHeight;
-      const nextRowHeight = itemHeight + GRID_ROW_GAP;
+      const nextRowHeight = itemRef.current.offsetHeight + GRID_ROW_GAP;
 
       setRowHeight(nextRowHeight);
     };
@@ -52,7 +51,11 @@ export const PhotoGrid = memo(function PhotoGrid({ photos, focusRow, focusCol, c
                 <div className="photo-grid__image">
                   <img src={photo.src} alt={photo.title || ''} loading="lazy" />
                 </div>
-                <div className="photo-grid__title">{photo.title}</div>
+                <div
+                  className={`photo-grid__title ${isFocused ? 'photo-grid__title--visible' : ''}`}
+                >
+                  {photo.title}
+                </div>
               </div>
             );
           })}
