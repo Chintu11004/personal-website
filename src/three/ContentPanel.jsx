@@ -5,7 +5,7 @@ import { navItems } from './navItems';
 import { lerp, lerpFactor } from './utils/animation';
 import './ContentPanel.css';
 
-export const IDLE_DELAY = 1.0;
+export const IDLE_DELAY = 2.0;
 export const HIDDEN_OFFSET_X = 0.12;
 
 // Focused icon (-0.69, 0.32) + selected submenu local (-0.37, -0.27) + panel offset (0.85, 0)

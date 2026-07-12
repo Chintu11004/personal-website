@@ -176,7 +176,13 @@ const SubItem = memo(function SubItem({
           position={[0, 0, 0]}
           htmlRef={htmlRef}
           fontSize="13px"
-          style={{ textAlign: 'left', transform: 'translateY(-50%)' }}
+          style={{
+            textAlign: 'left',
+            transform: 'translateY(-50%)',
+            width: '175px',
+            whiteSpace: 'normal',
+            lineHeight: 1.2,
+          }}
           center
         />
       </group>
