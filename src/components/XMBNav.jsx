@@ -4,7 +4,7 @@ import './XMBNav.css';
 
 export const navData = navItems;
 
-function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol }) {
+function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photoGridFocusRef }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!focusColRef.current) return;
@@ -20,6 +20,57 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol }) {
       const setDepth = (val) => {
         if (navDepthRef?.current) navDepthRef.current.value = val;
       };
+
+      const GRID_COLS = 5;
+      const currentSubItem = subItems[getSubRow()];
+      const isFolder = currentSubItem?.type === 'folder';
+      const photos = currentSubItem?.photos ?? [];
+      const maxPhotoIndex = Math.max(0, photos.length - 1);
+
+      // At depth 1 on a folder, all arrow keys control the photo grid
+      if (depth === 1 && isFolder) {
+        const gridRow = photoGridFocusRef?.current?.row ?? 0;
+        const gridCol = photoGridFocusRef?.current?.col ?? 0;
+        const currentIndex = gridRow * GRID_COLS + gridCol;
+
+        switch (e.key) {
+          case 'ArrowLeft':
+            e.preventDefault();
+            if (gridCol > 0) {
+              photoGridFocusRef.current.col = gridCol - 1;
+            }
+            break;
+          case 'ArrowRight':
+            e.preventDefault();
+            if (currentIndex + 1 <= maxPhotoIndex && gridCol < GRID_COLS - 1) {
+              photoGridFocusRef.current.col = gridCol + 1;
+            }
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            if (gridRow > 0) {
+              photoGridFocusRef.current.row = gridRow - 1;
+            }
+            break;
+          case 'ArrowDown':
+            e.preventDefault();
+            const nextRowIndex = (gridRow + 1) * GRID_COLS + gridCol;
+            if (nextRowIndex <= maxPhotoIndex) {
+              photoGridFocusRef.current.row = gridRow + 1;
+            }
+            break;
+          case 'Escape':
+          case 'Backspace':
+            e.preventDefault();
+            setDepth(0);
+            photoGridFocusRef.current.row = 0;
+            photoGridFocusRef.current.col = 0;
+            break;
+          default:
+            break;
+        }
+        return;
+      }
 
       switch (e.key) {
         case 'ArrowLeft':
@@ -52,7 +103,13 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol }) {
         case ' ':
           e.preventDefault();
           if (subItems.length > 0 && depth === 0) {
-            setDepth(1);
+            const subItem = subItems[getSubRow()];
+            // Only enter depth 1 for folders
+            if (subItem?.type === 'folder') {
+              setDepth(1);
+              photoGridFocusRef.current.row = 0;
+              photoGridFocusRef.current.col = 0;
+            }
             break;
           }
           {
@@ -82,7 +139,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol }) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusColRef, focusSubRowRef, navDepthRef, navigateToCol]);
+  }, [focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photoGridFocusRef]);
 
   return (
     <nav className="xmb-nav" aria-label="Main navigation">

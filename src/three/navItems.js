@@ -5,7 +5,31 @@ export const navItems = [
     label: 'Photo Projects',
     image: '/icons/03.png',
     items: [
-      { label: 'University of Wisocnsin-Madison Campus', type: 'folder' },
+      {
+        label: 'University of Wisocnsin-Madison Campus',
+        type: 'folder',
+        photos: Array.from({ length: 40 }, (_, i) => {
+          const n = i + 1;
+          const images = [
+            '/images/photos/dream_sim/01.jpg',
+            '/images/photos/dream_sim/05.jpg',
+            '/images/photos/dream_sim/06.jpg',
+          ];
+          const dates = [
+            '21/8/2010 9:39',
+            '21/8/2010 10:15',
+            '21/8/2010 11:22',
+            '22/8/2010 14:33',
+            '22/8/2010 15:18',
+            '23/8/2010 9:05',
+          ];
+          return {
+            src: images[i % images.length],
+            title: `Campus View ${String(n).padStart(2, '0')}`,
+            date: dates[i % dates.length],
+          };
+        }),
+      },
       {
         label: 'Dream Simulator',
         type: 'launcher',
@@ -25,7 +49,15 @@ export const navItems = [
           ],
         },
       },
-      { label: 'UW Arboretum', type: 'folder' },
+      {
+        label: 'UW Arboretum',
+        type: 'folder',
+        photos: [
+          { src: '/images/photos/dream_sim/06.jpg', title: 'Arboretum 01', date: '15/7/2010 8:12' },
+          { src: '/images/photos/dream_sim/01.jpg', title: 'Arboretum 02', date: '15/7/2010 9:45' },
+          { src: '/images/photos/dream_sim/05.jpg', title: 'Arboretum 03', date: '15/7/2010 11:30' },
+        ],
+      },
     ],
   },
   { label: 'SWE', image: '/icons/23.png' },

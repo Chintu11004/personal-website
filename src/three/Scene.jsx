@@ -3,11 +3,12 @@ import { useThree } from '@react-three/fiber';
 import { OrthographicCamera } from '@react-three/drei';
 import { BackgroundRibbon } from './BackgroundRibbon';
 import { ContentPanel } from './ContentPanel';
+import { PhotoGridPanel } from './PhotoGridPanel';
 import { ContentPanelBackground } from './ContentPanelBackground';
 import { NavIcons } from './NavIcons';
 import { CAMERA } from './cameraConfig';
 
-export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, focusCol, exitingCols, removingExitingCols }) {
+export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, photoGridPanelVisibleRef, focusCol, exitingCols, removingExitingCols, photoGridFocusRef }) {
   const size = useThree((state) => state.size);
   const camera = useThree((state) => state.camera);
   const aspect = size.width / size.height;
@@ -42,6 +43,13 @@ export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDept
         focusColRef={focusColRef}
         focusSubRowRef={focusSubRowRef}
         contentPanelVisibleRef={contentPanelVisibleRef}
+      />
+      <PhotoGridPanel
+        focusColRef={focusColRef}
+        focusSubRowRef={focusSubRowRef}
+        navDepthRef={navDepthRef}
+        photoGridFocusRef={photoGridFocusRef}
+        photoGridPanelVisibleRef={photoGridPanelVisibleRef}
       />
       <NavIcons
         focusCol={focusCol}
