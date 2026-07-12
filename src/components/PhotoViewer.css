@@ -1,0 +1,14 @@
+.photo-viewer {
+  display: inline-flex;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.photo-viewer__image {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}

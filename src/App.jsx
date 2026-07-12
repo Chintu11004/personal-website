@@ -14,6 +14,7 @@ function App() {
   const contentPanelVisibleRef = useRef({ value: 0 });
   const photoGridPanelVisibleRef = useRef({ value: 0 });
   const photoGridFocusRef = useRef({ row: 0, col: 0 });
+  const photoViewerOpenRef = useRef(false);
 
   const removingExitingCol = useCallback((colIndex) => {
     setExitingCols((prev) => prev.filter((c) => c !== colIndex));
@@ -30,6 +31,7 @@ function App() {
     setExitingCols((prev) => prev.filter((c) => c !== newCol));
 
     navDepthRef.current.value = 0;
+    photoViewerOpenRef.current = false;
     focusColRef.current.value = newCol;
     setFocusCol(newCol);
   }, []);
@@ -58,6 +60,7 @@ function App() {
           exitingCols={exitingCols}
           removingExitingCols={removingExitingCol}
           photoGridFocusRef={photoGridFocusRef}
+          photoViewerOpenRef={photoViewerOpenRef}
         />
       </Canvas>
       <XMBNav
@@ -66,6 +69,7 @@ function App() {
         navDepthRef={navDepthRef}
         navigateToCol={navigateToCol}
         photoGridFocusRef={photoGridFocusRef}
+        photoViewerOpenRef={photoViewerOpenRef}
       />
     </>
   );

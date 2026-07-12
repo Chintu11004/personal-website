@@ -4,11 +4,12 @@ import { OrthographicCamera } from '@react-three/drei';
 import { BackgroundRibbon } from './BackgroundRibbon';
 import { ContentPanel } from './ContentPanel';
 import { PhotoGridPanel } from './PhotoGridPanel';
+import { PhotoViewerPanel } from './PhotoViewerPanel';
 import { ContentPanelBackground } from './ContentPanelBackground';
 import { NavIcons } from './NavIcons';
 import { CAMERA } from './cameraConfig';
 
-export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, photoGridPanelVisibleRef, focusCol, exitingCols, removingExitingCols, photoGridFocusRef }) {
+export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, photoGridPanelVisibleRef, focusCol, exitingCols, removingExitingCols, photoGridFocusRef, photoViewerOpenRef }) {
   const size = useThree((state) => state.size);
   const camera = useThree((state) => state.camera);
   const aspect = size.width / size.height;
@@ -50,6 +51,13 @@ export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDept
         navDepthRef={navDepthRef}
         photoGridFocusRef={photoGridFocusRef}
         photoGridPanelVisibleRef={photoGridPanelVisibleRef}
+        photoViewerOpenRef={photoViewerOpenRef}
+      />
+      <PhotoViewerPanel
+        focusColRef={focusColRef}
+        focusSubRowRef={focusSubRowRef}
+        photoGridFocusRef={photoGridFocusRef}
+        photoViewerOpenRef={photoViewerOpenRef}
       />
       <NavIcons
         focusCol={focusCol}

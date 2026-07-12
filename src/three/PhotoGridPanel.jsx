@@ -7,6 +7,7 @@ import { PhotoGrid } from '../components/PhotoGrid';
 import '../components/PhotoGrid.css';
 
 export const HIDDEN_OFFSET_X = 0.12;
+const OPACITY_RESET_THRESHOLD = 0.01;
 
 // Anchors top-left of the grid beside the depth-1 folder icon
 const POSITION = [-0.45, 0.16, 0];
@@ -29,6 +30,7 @@ export const PhotoGridPanel = memo(function PhotoGridPanel({
   navDepthRef,
   photoGridFocusRef,
   photoGridPanelVisibleRef,
+  photoViewerOpenRef,
 }) {
   const groupRef = useRef();
   const htmlRef = useRef();
@@ -70,12 +72,15 @@ export const PhotoGridPanel = memo(function PhotoGridPanel({
         photoGridFocusRef.current.row = 0;
         photoGridFocusRef.current.col = 0;
       }
+      if (photoViewerOpenRef) {
+        photoViewerOpenRef.current = false;
+      }
     }
 
     const focusedItem = getFocusedSubItem(focusColRef, focusSubRowRef);
     const shouldShow = depth === 1 && focusedItem?.type === 'folder';
 
-    if (photoGridFocusRef?.current) {
+    if (shouldShow && photoGridFocusRef?.current) {
       setGridFocus({ row: photoGridFocusRef.current.row, col: photoGridFocusRef.current.col });
     }
 
@@ -89,6 +94,17 @@ export const PhotoGridPanel = memo(function PhotoGridPanel({
 
     opacity.current = lerp(opacity.current, shouldShow ? 1 : 0, t);
     slideX.current = lerp(slideX.current, shouldShow ? 0 : HIDDEN_OFFSET_X, t);
+
+    if (
+      !shouldShow &&
+      opacity.current < OPACITY_RESET_THRESHOLD &&
+      photoGridFocusRef?.current &&
+      (photoGridFocusRef.current.row !== 0 || photoGridFocusRef.current.col !== 0)
+    ) {
+      photoGridFocusRef.current.row = 0;
+      photoGridFocusRef.current.col = 0;
+      setGridFocus({ row: 0, col: 0 });
+    }
 
     if (photoGridPanelVisibleRef?.current) {
       photoGridPanelVisibleRef.current.value = opacity.current;
