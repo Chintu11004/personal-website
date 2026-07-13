@@ -61,7 +61,18 @@ export const navItems = [
       },
     ],
   },
-  { label: 'SWE', image: '/icons/23.png' },
+  { label: 'SWE', image: '/icons/23.png',
+    items: [
+      {
+        label: 'KinCapsule Co-op',
+        type: 'describe',
+        content: {
+          title: 'KinCapsule Co-op',
+          description: '',
+        },
+      },
+    ]
+   },
   {
     label: 'Games',
     image: '/icons/06.png',

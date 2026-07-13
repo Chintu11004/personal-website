@@ -23,11 +23,12 @@ function iconBodyPropsAreEqual(prev, next) {
     prev.groupRef === next.groupRef &&
     prev.focusColRef === next.focusColRef &&
     prev.navDepthRef === next.navDepthRef &&
+    prev.fullscreenPanelVisibleRef === next.fullscreenPanelVisibleRef &&
     prev.shaders === next.shaders
   );
 }
 
-const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, navDepthRef, shaders }) {
+const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, navDepthRef, fullscreenPanelVisibleRef, shaders }) {
   const focusCol = focusColRef.current?.value ?? 0;
   const colOffset = index - focusCol;
   const isSelected = index === focusCol;
@@ -77,6 +78,7 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, na
     const isSelected = index === focusCol;
     const colOffset = index - focusCol;
     const depth = navDepthRef?.current?.value ?? 0;
+    const hide = 1 - (fullscreenPanelVisibleRef?.current?.value ?? 0);
     const t = lerpFactor(delta);
 
     targetPosition.current.set((colOffset * LAYOUT.spacing) - 0.64, LAYOUT.verticalOffset, 0);
@@ -91,8 +93,8 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, na
       isSelected,
       targetX: isSelected && (depth > 0) ? LAYOUT.depthSelect_OffsetX : depth > 0 ? LAYOUT.depthUnselect_OffsetX : 0,
       targetScale: isSelected ? SELECTION.selectedScale : (depth > 0) ? SELECTION.depthUnselectedScale : SELECTION.unselectedScale,
-      targetShaderOpacity: isSelected ? SELECTION.selectedOpacity : (depth > 0) ? SELECTION.depthUnselectedOpacity : SELECTION.unselectedOpacity,
-      targetLabelOpacity: isSelected ? SELECTION.labelSelectedOpacity : SELECTION.labelUnselectedOpacity,
+      targetShaderOpacity: (isSelected ? SELECTION.selectedOpacity : (depth > 0) ? SELECTION.depthUnselectedOpacity : SELECTION.unselectedOpacity) * hide,
+      targetLabelOpacity: (isSelected ? SELECTION.labelSelectedOpacity : SELECTION.labelUnselectedOpacity) * hide,
     });
   }, -1);
 
@@ -116,7 +118,7 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, na
   );
 }, iconBodyPropsAreEqual);
 
-function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, shaders }) {
+function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, fullscreenPanelVisibleRef, shaders }) {
   const groupRef = useRef();
   const isActive = index === focusCol;
   const isExiting = exitingCols.includes(index);
@@ -134,6 +136,7 @@ function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusCo
         groupRef={groupRef}
         focusColRef={focusColRef}
         navDepthRef={navDepthRef}
+        fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
         shaders={shaders}
       />
       {showSubMenu && (
@@ -146,6 +149,7 @@ function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusCo
           focusColRef={focusColRef}
           navDepthRef={navDepthRef}
           contentPanelVisibleRef={contentPanelVisibleRef}
+          fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
           shaders={shaders}
         />
       )}
@@ -161,6 +165,7 @@ export const NavIcons = memo(function NavIcons({
   focusSubRowRef,
   navDepthRef,
   contentPanelVisibleRef,
+  fullscreenPanelVisibleRef,
 }) {
   const shaders = useIconShaders();
 
@@ -177,6 +182,7 @@ export const NavIcons = memo(function NavIcons({
           focusSubRowRef={focusSubRowRef}
           navDepthRef={navDepthRef}
           contentPanelVisibleRef={contentPanelVisibleRef}
+          fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
           shaders={shaders}
           focusCol={focusCol}
           exitingCols={exitingCols}

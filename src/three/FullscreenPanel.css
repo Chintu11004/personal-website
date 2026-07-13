@@ -1,0 +1,88 @@
+.fullscreen-panel {
+  --panel-inset-y: 15vh;
+  --panel-footer-offset-x: 15vh;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.fullscreen-panel__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.fullscreen-panel__line--top {
+  top: var(--panel-inset-y);
+}
+
+.fullscreen-panel__line--bottom {
+  bottom: var(--panel-inset-y);
+}
+
+.fullscreen-panel__header {
+  position: absolute;
+  top: calc(var(--panel-inset-y) - 1.6rem);
+  left: 8vw;
+  right: 48px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fullscreen-panel__footer {
+  position: absolute;
+  bottom: calc(var(--panel-inset-y) - 1.6rem);
+  left: 50%;
+  transform: translateX(calc(-50% + var(--panel-footer-offset-x)));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fullscreen-panel__body {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  color: white;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  min-height: 0;
+  height: 100%;
+  padding-top: var(--panel-inset-y);
+  padding-inline: 48px;
+  padding-bottom: 32px;
+}
+
+.fullscreen-panel__icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.fullscreen-panel__title,
+.fullscreen-panel__label {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.fullscreen-panel__desc {
+  margin: 0;
+  max-width: 42rem;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: pre-line;
+}

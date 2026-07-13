@@ -52,6 +52,7 @@ function subItemPropsAreEqual(prev, next) {
     prev.focusColRef === next.focusColRef &&
     prev.navDepthRef === next.navDepthRef &&
     prev.contentPanelVisibleRef === next.contentPanelVisibleRef &&
+    prev.fullscreenPanelVisibleRef === next.fullscreenPanelVisibleRef &&
     prev.shaders === next.shaders
   );
 }
@@ -65,6 +66,7 @@ const SubItem = memo(function SubItem({
   focusColRef,
   navDepthRef,
   contentPanelVisibleRef,
+  fullscreenPanelVisibleRef,
   shaders,
 }) {
   const isCustomThumbnail = item.thumbnail === 'custom';
@@ -121,6 +123,8 @@ const SubItem = memo(function SubItem({
     const depth = navDepthRef?.current?.value ?? 0;
     const entered = isFocusCol && depth > 0;
     const panelVisible = contentPanelVisibleRef?.current?.value ?? 0;
+    const fullscreenVisible = fullscreenPanelVisibleRef?.current?.value ?? 0;
+    const overlayOpacity = Math.max(panelVisible, fullscreenVisible);
 
     let targetLabelOpacity = isSelected
       ? SUB_SELECTION.labelSelectedOpacity
@@ -135,8 +139,18 @@ const SubItem = memo(function SubItem({
       labelGroupRef.current.position.x = currentLabelX.current;
     }
 
-    if (panelVisible > 0) {
-      targetLabelOpacity *= 1 - panelVisible;
+    if (overlayOpacity > 0) {
+      targetLabelOpacity *= 1 - overlayOpacity;
+    }
+
+    let targetShaderOpacity = isSelected
+      ? SELECTION.selectedOpacity
+      : entered
+        ? SELECTION.depthUnselectedOpacity + 0.25
+        : SELECTION.unselectedOpacity;
+
+    if (fullscreenVisible > 0) {
+      targetShaderOpacity *= 1 - fullscreenVisible;
     }
 
     step(delta, state.camera.position, {
@@ -144,7 +158,7 @@ const SubItem = memo(function SubItem({
       targetX: isSelected && entered ? LAYOUT.depthSelectOffsetX : entered ? LAYOUT.depthUnselectOffsetX : 0,
       targetY: getRowY(index - focusSubRow),
       targetScale: isSelected ? SUB_SELECTION.selectedScale : entered ? SUB_SELECTION.depthUnselectedScale : SUB_SELECTION.unselectedScale,
-      targetShaderOpacity: isSelected ? SELECTION.selectedOpacity : entered ? SELECTION.depthUnselectedOpacity + 0.25 : SELECTION.unselectedOpacity,
+      targetShaderOpacity,
       targetLabelOpacity,
     });
   });
@@ -199,6 +213,7 @@ export const VerticalSubMenu = memo(function VerticalSubMenu({
   focusColRef,
   navDepthRef,
   contentPanelVisibleRef,
+  fullscreenPanelVisibleRef,
   shaders,
 }) {
   const masterOpacity = useRef(mode === 'active' ? 0 : 1);
@@ -229,6 +244,7 @@ export const VerticalSubMenu = memo(function VerticalSubMenu({
           focusColRef={focusColRef}
           navDepthRef={navDepthRef}
           contentPanelVisibleRef={contentPanelVisibleRef}
+          fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
           shaders={shaders}
         />
       ))}

@@ -13,6 +13,8 @@ function App() {
   const focusSubRowRef = useRef({ values: navItems.map(() => 0) });
   const navDepthRef = useRef({ value: 0 });
   const contentPanelVisibleRef = useRef({ value: 0 });
+  const fullscreenPanelVisibleRef = useRef({ value: 0 });
+  const fullscreenOpenRef = useRef(false);
   const photoGridPanelVisibleRef = useRef({ value: 0 });
   const photoGridFocusRef = useRef({ row: 0, col: 0 });
   const photoViewerOpenRef = useRef(false);
@@ -33,6 +35,7 @@ function App() {
 
     navDepthRef.current.value = 0;
     photoViewerOpenRef.current = false;
+    fullscreenOpenRef.current = false;
     focusColRef.current.value = newCol;
     setFocusCol(newCol);
   }, []);
@@ -56,6 +59,8 @@ function App() {
           focusSubRowRef={focusSubRowRef}
           navDepthRef={navDepthRef}
           contentPanelVisibleRef={contentPanelVisibleRef}
+          fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
+          fullscreenOpenRef={fullscreenOpenRef}
           photoGridPanelVisibleRef={photoGridPanelVisibleRef}
           focusCol={focusCol}
           exitingCols={exitingCols}
@@ -71,10 +76,12 @@ function App() {
         navigateToCol={navigateToCol}
         photoGridFocusRef={photoGridFocusRef}
         photoViewerOpenRef={photoViewerOpenRef}
+        fullscreenOpenRef={fullscreenOpenRef}
       />
       <Clock
         contentPanelVisibleRef={contentPanelVisibleRef}
         photoViewerOpenRef={photoViewerOpenRef}
+        fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
       />
     </>
   );

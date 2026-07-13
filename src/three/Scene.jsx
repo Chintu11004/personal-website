@@ -6,10 +6,11 @@ import { ContentPanel } from './ContentPanel';
 import { PhotoGridPanel } from './PhotoGridPanel';
 import { PhotoViewerPanel } from './PhotoViewerPanel';
 import { ContentPanelBackground } from './ContentPanelBackground';
+import { FullscreenPanel } from './FullscreenPanel';
 import { NavIcons } from './NavIcons';
 import { CAMERA } from './cameraConfig';
 
-export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, photoGridPanelVisibleRef, focusCol, exitingCols, removingExitingCols, photoGridFocusRef, photoViewerOpenRef }) {
+export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, fullscreenPanelVisibleRef, fullscreenOpenRef, photoGridPanelVisibleRef, focusCol, exitingCols, removingExitingCols, photoGridFocusRef, photoViewerOpenRef }) {
   const size = useThree((state) => state.size);
   const camera = useThree((state) => state.camera);
   const aspect = size.width / size.height;
@@ -59,6 +60,12 @@ export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDept
         photoGridFocusRef={photoGridFocusRef}
         photoViewerOpenRef={photoViewerOpenRef}
       />
+      <FullscreenPanel
+        focusColRef={focusColRef}
+        focusSubRowRef={focusSubRowRef}
+        fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
+        fullscreenOpenRef={fullscreenOpenRef}
+      />
       <NavIcons
         focusCol={focusCol}
         exitingCols={exitingCols}
@@ -67,6 +74,7 @@ export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDept
         focusSubRowRef={focusSubRowRef}
         navDepthRef={navDepthRef}
         contentPanelVisibleRef={contentPanelVisibleRef}
+        fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
       />
     </>
   );

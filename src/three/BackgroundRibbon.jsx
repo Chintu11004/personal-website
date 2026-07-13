@@ -60,8 +60,8 @@ export function BackgroundRibbon({ contentPanelVisibleRef }) {
 
     materialRef.current.uniforms.u_time.value = state.clock.elapsedTime;
 
-    const panelVisible = contentPanelVisibleRef?.current?.value ?? 0;
-    materialRef.current.uniforms.u_opacity.value = 1 - panelVisible;
+    const contentVisible = contentPanelVisibleRef?.current?.value ?? 0;
+    materialRef.current.uniforms.u_opacity.value = 1 - contentVisible;
 
     // Ribbon is continuously animated; keep the demand loop alive.
     state.invalidate();
