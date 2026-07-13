@@ -6,6 +6,7 @@ import { getFocusedSubItem, getSelectionFingerprint } from './utils/selection';
 import './FullscreenPanel.css';
 
 const DEFAULT_SUB_ICON = '/icons/dif.png';
+const PANEL_BLUR_MAX = 8;
 
 function screenCenterPosition(_, camera, size) {
   return [size.width / 2, size.height / 2];
@@ -18,6 +19,8 @@ export const FullscreenPanel = memo(function FullscreenPanel({
   fullscreenOpenRef,
 }) {
   const htmlRef = useRef();
+  const backdropRef = useRef();
+  const contentRef = useRef();
   const opacity = useRef(0);
   const lastFingerprint = useRef('');
   const [subItem, setSubItem] = useState(null);
@@ -38,7 +41,13 @@ export const FullscreenPanel = memo(function FullscreenPanel({
       fullscreenPanelVisibleRef.current.value = opacity.current;
     }
 
-    if (htmlRef.current) htmlRef.current.style.opacity = String(opacity.current);
+    if (contentRef.current) contentRef.current.style.opacity = String(opacity.current);
+    if (backdropRef.current) {
+      const blur = opacity.current * PANEL_BLUR_MAX;
+      const blurValue = `blur(${blur}px)`;
+      backdropRef.current.style.backdropFilter = blurValue;
+      backdropRef.current.style.webkitBackdropFilter = blurValue;
+    }
   }, -1);
 
   return (
@@ -47,29 +56,32 @@ export const FullscreenPanel = memo(function FullscreenPanel({
         ref={htmlRef}
         fullscreen
         calculatePosition={screenCenterPosition}
-        style={{ opacity: 0, pointerEvents: 'none' }}
+        style={{ pointerEvents: 'none' }}
       >
         <div className="fullscreen-panel" role="dialog" aria-modal="true">
-          <div className="fullscreen-panel__line fullscreen-panel__line--top" />
-          <div className="fullscreen-panel__line fullscreen-panel__line--bottom" />
-          {subItem?.content && (
-            <>
-              <div className="fullscreen-panel__header">
-                <img
-                  className="fullscreen-panel__icon"
-                  src={subItem.image ?? DEFAULT_SUB_ICON}
-                  alt=""
-                />
-                <p className="fullscreen-panel__title">{subItem.content.title}</p>
-              </div>
-              <div className="fullscreen-panel__body">
-                <p className="fullscreen-panel__desc">{subItem.content.description}</p>
-              </div>
-              <div className="fullscreen-panel__footer">
-                <p className="fullscreen-panel__label">ESC exit</p>
-              </div>
-            </>
-          )}
+          <div ref={backdropRef} className="fullscreen-panel__backdrop" />
+          <div ref={contentRef} className="fullscreen-panel__content" style={{ opacity: 0 }}>
+            <div className="fullscreen-panel__line fullscreen-panel__line--top" />
+            <div className="fullscreen-panel__line fullscreen-panel__line--bottom" />
+            {subItem?.content && (
+              <>
+                <div className="fullscreen-panel__header">
+                  <img
+                    className="fullscreen-panel__icon"
+                    src={subItem.image ?? DEFAULT_SUB_ICON}
+                    alt=""
+                  />
+                  <p className="fullscreen-panel__title">{subItem.content.title}</p>
+                </div>
+                <div className="fullscreen-panel__body">
+                  <p className="fullscreen-panel__desc">{subItem.content.description}</p>
+                </div>
+                <div className="fullscreen-panel__footer">
+                  <p className="fullscreen-panel__label">ESC exit</p>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </Html>
     </group>

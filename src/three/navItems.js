@@ -68,7 +68,8 @@ export const navItems = [
         type: 'describe',
         content: {
           title: 'KinCapsule Co-op',
-          description: '',
+          description: `• Shipped production features for a live React web platform used by real users, including autosave and media attachment in story creation, forum membership flows, and global/local content search.
+• Implemented Facebook OAuth and content import using Firebase Cloud Functions and Meta Graph APIs, enabling users to transfer posts from Facebook into KinCapsule to consolidate a single place for cataloging memories and life stories.`,
         },
       },
     ]

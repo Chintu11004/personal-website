@@ -8,12 +8,30 @@
   user-select: none;
 }
 
+.fullscreen-panel__backdrop {
+  position: absolute;
+  top: var(--panel-inset-y);
+  bottom: var(--panel-inset-y);
+  left: 0;
+  right: 0;
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  will-change: backdrop-filter;
+}
+
+.fullscreen-panel__content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 .fullscreen-panel__line {
   position: absolute;
   left: 0;
   right: 0;
   height: 1.5px;
   background: rgba(255, 255, 255, 0.4);
+  z-index: 1;
 }
 
 .fullscreen-panel__line--top {
@@ -32,6 +50,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  z-index: 1;
 }
 
 .fullscreen-panel__footer {
@@ -42,6 +61,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1;
 }
 
 .fullscreen-panel__body {
@@ -56,6 +76,7 @@
   padding-top: var(--panel-inset-y);
   padding-inline: 48px;
   padding-bottom: 32px;
+  z-index: 1;
 }
 
 .fullscreen-panel__icon {
