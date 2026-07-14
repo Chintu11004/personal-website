@@ -1,3 +1,6 @@
+import dreamSimulatorDescription from '../content/dream-simulator.txt?raw';
+import kinCapsuleDescription from '../content/kincapsule-coop.txt?raw';
+
 export const navItems = [
   { label: 'User', image: '/icons/01.png' },
   { label: 'Settings', image: '/icons/02.png' },
@@ -40,8 +43,7 @@ export const navItems = [
         image: '/images/photos/dream_sim/artist-card.jpg',
         content: {
           title: 'Dream Simulator',
-          description: `  The world tends to be a bit selfish and unfair – it takes and takes more of whatever work you put in it, only for you to get pennies on the dollar. People love underdog stories because they let you believe you can “win,” but most of the time you don’t. That’s normal. That’s life.
-  “Dream Simulator” aims to tell the story of an unsuspecting traveler who spent too much time in the arboretum and has been pulled into the consciousness of the forest, simply because it was the forest’s nature and purpose to assimilate.`,
+          description: dreamSimulatorDescription.trimEnd(),
           background: '/images/photos/dream_sim/artist-card.jpg',
           images: [
             '/images/photos/dream_sim/01.jpg',
@@ -68,8 +70,7 @@ export const navItems = [
         type: 'describe',
         content: {
           title: 'KinCapsule Co-op',
-          description: `• Shipped production features for a live React web platform used by real users, including autosave and media attachment in story creation, forum membership flows, and global/local content search.
-• Implemented Facebook OAuth and content import using Firebase Cloud Functions and Meta Graph APIs, enabling users to transfer posts from Facebook into KinCapsule to consolidate a single place for cataloging memories and life stories.`,
+          description: kinCapsuleDescription.trimEnd(),
         },
       },
     ]

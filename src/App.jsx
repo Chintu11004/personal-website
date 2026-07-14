@@ -81,7 +81,7 @@ function App() {
       <Clock
         contentPanelVisibleRef={contentPanelVisibleRef}
         photoViewerOpenRef={photoViewerOpenRef}
-        fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
+        fullscreenOpenRef={fullscreenOpenRef}
       />
     </>
   );

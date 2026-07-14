@@ -1,0 +1,22 @@
+[image: /images/kincapsule/kc-logo.png]
+
+KinCapsule is a storytelling platform in the FamilyTech and AgeTech space, designed to preserve life stories, celebrate legacies, and foster meaningful intergenerational connections. The platform allows users to organize memories, create stories, and securely share them with family and communities.
+
+This was a capstone project completed during the Fall 2025 semester in collaboration with Jack Kurle, Viktoria Sakman, Taylor Wilmot, and Viktoria Sakman. We followed an Agile development process, working closely with the KinCapsule team to develop and ship production-ready features for their live React application.
+
+My individual contributions to the project:
+• Built autosave functionality for story creation to prevent accidental data loss.
+• Added media attachments for story posts.
+• Added folder-specific search for posts.
+• Stored imported stories in Firebase Cloud Firestore before migration to the KinCapsule backend.
+
+[youtube: https://youtu.be/8CklSCpaBsI]
+
+Together as a group, we:
+• Shipped 10+ production features for a live React web platform used by hundreds of real users, including autosave and media attachment in story creation, forum membership flows, and global/local content search.
+• Implemented Facebook OAuth and content import using Firebase Cloud Functions and Meta Graph APIs, enabling users to transfer posts from Facebook into KinCapsule to consolidate a single place for cataloguing memories and life stories.
+
+At the conclusion of the project, our team delivered comprehensive handoff documentation that included completed Jira tickets, deployment instructions, outstanding merge requests, production limitations, and a migration plan for moving imported Facebook content from our Firebase infrastructure to KinCapsule's production backend.
+
+
+Technologies: React.js, Node.js, Firebase, Figma, Meta Graph API, OAuth, Jira, Git, Agile
