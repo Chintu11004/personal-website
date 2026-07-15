@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import { PhotoViewer } from '../components/PhotoViewer';
 import { lerp, lerpFactor } from './utils/animation';
-import { getFocusedSubItem, getSelectionFingerprint } from './utils/selection';
+import { getFocusedSubItem, getSelectionFingerprint, getSubItemPhotos } from './utils/selection';
 import './PhotoViewerPanel.css';
 
 const GRID_COLS = 5;
@@ -31,7 +31,7 @@ export const PhotoViewerPanel = memo(function PhotoViewerPanel({
     if (fingerprint !== lastFingerprint.current) {
       lastFingerprint.current = fingerprint;
       const focusedItem = getFocusedSubItem(focusColRef, focusSubRowRef);
-      setPhotos(focusedItem?.photos ?? []);
+      setPhotos(getSubItemPhotos(focusedItem));
       lastPhotoKey.current = '';
       setActivePhoto(null);
     }

@@ -31,6 +31,8 @@ export const INTRO_PANEL_CONTENT = {
 };
 
 export const STARTUP_AUDIO = '/music/start-up.mp3';
+export const NAV_DECIDE_AUDIO = '/music/decide.mp3';
+export const NAV_CANCEL_AUDIO = '/music/cancel.mp3';
 
 function clampedProgress(elapsedTime, start, duration) {
   return Math.max(0, Math.min((elapsedTime - start) / duration, 1));

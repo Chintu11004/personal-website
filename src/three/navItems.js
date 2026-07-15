@@ -102,5 +102,30 @@ export const navItems = [
     ],
   },
   { label: 'Contact Me', image: '/icons/07.png' },
-  { label: 'Friends', image: '/icons/08.png' },
+  {
+    label: 'Friends',
+    image: '/icons/08.png',
+    items: [
+      {
+        label: 'Campus Sunset',
+        type: 'photo',
+        thumbnail: 'custom',
+        widthOfTB: 1.4,
+        heightOfTB: 1,
+        src: '/images/photos/dream_sim/01.jpg',
+        title: 'Campus Sunset',
+        date: '21/8/2010 9:39',
+      },
+      {
+        label: 'Arboretum Walk',
+        type: 'photo',
+        thumbnail: 'custom',
+        widthOfTB: 1.4,
+        heightOfTB: 1,
+        src: '/images/photos/dream_sim/06.jpg',
+        title: 'Arboretum Walk',
+        date: '15/7/2010 8:12',
+      },
+    ],
+  },
 ];

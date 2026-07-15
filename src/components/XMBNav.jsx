@@ -1,10 +1,24 @@
 import { useEffect } from 'react';
 import { navItems } from '../three/navItems';
+import { NAV_CANCEL_AUDIO, NAV_DECIDE_AUDIO } from '../three/introConfig';
+import { playUiSound, preloadUiSound, unlockUiAudio } from '../utils/uiSound';
 import './XMBNav.css';
 
 export const navData = navItems;
 
 const GRID_COLS = 5;
+const NAV_SOUNDS = [NAV_DECIDE_AUDIO, NAV_CANCEL_AUDIO];
+
+preloadUiSound(NAV_DECIDE_AUDIO);
+preloadUiSound(NAV_CANCEL_AUDIO);
+
+function playDecide() {
+  playUiSound(NAV_DECIDE_AUDIO);
+}
+
+function playCancel() {
+  playUiSound(NAV_CANCEL_AUDIO);
+}
 
 function setPhotoIndex(index, photoGridFocusRef) {
   if (!photoGridFocusRef?.current) return;
@@ -18,12 +32,15 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
       if (!focusColRef.current) return;
       if (!introCompleteRef?.current) return;
 
+      unlockUiAudio(NAV_SOUNDS);
+
       if (fullscreenOpenRef?.current) {
         switch (e.key) {
           case 'Escape':
           case 'Backspace':
             e.preventDefault();
             fullscreenOpenRef.current = false;
+            playCancel();
             break;
           default:
             break;
@@ -49,8 +66,27 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
 
       const currentSubItem = subItems[getSubRow()];
       const isFolder = currentSubItem?.type === 'folder';
+      const isPhoto = currentSubItem?.type === 'photo';
       const photos = currentSubItem?.photos ?? [];
       const maxPhotoIndex = Math.max(0, photos.length - 1);
+
+      // At depth 1 on a photo item, only the viewer is open (no grid)
+      if (depth === 1 && isPhoto) {
+        if (photoViewerOpenRef?.current) {
+          switch (e.key) {
+            case 'Escape':
+            case 'Backspace':
+              e.preventDefault();
+              photoViewerOpenRef.current = false;
+              setDepth(0);
+              playCancel();
+              break;
+            default:
+              break;
+          }
+        }
+        return;
+      }
 
       // At depth 1 on a folder, arrow keys control the photo grid or viewer carousel
       if (depth === 1 && isFolder) {
@@ -77,6 +113,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
             case 'Backspace':
               e.preventDefault();
               photoViewerOpenRef.current = false;
+              playCancel();
               break;
             default:
               break;
@@ -89,25 +126,31 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
             e.preventDefault();
             if (gridCol > 0) {
               photoGridFocusRef.current.col = gridCol - 1;
+              playDecide();
             }
             break;
           case 'ArrowRight':
             e.preventDefault();
             if (currentIndex + 1 <= maxPhotoIndex && gridCol < GRID_COLS - 1) {
               photoGridFocusRef.current.col = gridCol + 1;
+              playDecide();
             }
             break;
           case 'ArrowUp':
             e.preventDefault();
             if (gridRow > 0) {
               photoGridFocusRef.current.row = gridRow - 1;
+              playDecide();
             }
             break;
           case 'ArrowDown':
             e.preventDefault();
-            const nextRowIndex = (gridRow + 1) * GRID_COLS + gridCol;
-            if (nextRowIndex <= maxPhotoIndex) {
-              photoGridFocusRef.current.row = gridRow + 1;
+            {
+              const nextRowIndex = (gridRow + 1) * GRID_COLS + gridCol;
+              if (nextRowIndex <= maxPhotoIndex) {
+                photoGridFocusRef.current.row = gridRow + 1;
+                playDecide();
+              }
             }
             break;
           case 'Enter':
@@ -115,6 +158,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
             e.preventDefault();
             if (photos.length > 0) {
               photoViewerOpenRef.current = true;
+              playDecide();
             }
             break;
           case 'Escape':
@@ -122,6 +166,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
             e.preventDefault();
             photoViewerOpenRef.current = false;
             setDepth(0);
+            playCancel();
             break;
           default:
             break;
@@ -134,27 +179,53 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
           e.preventDefault();
           if (depth > 0) {
             setDepth(0);
+            playDecide();
             break;
           }
-          navigateToCol(Math.max(0, col - 1));
+          {
+            const nextCol = Math.max(0, col - 1);
+            if (nextCol !== col) {
+              navigateToCol(nextCol);
+              playDecide();
+            }
+          }
           break;
         case 'ArrowRight':
           e.preventDefault();
           if (depth > 0) {
             setDepth(0);
+            playDecide();
             break;
           }
-          navigateToCol(Math.min(navItems.length - 1, col + 1));
+          {
+            const nextCol = Math.min(navItems.length - 1, col + 1);
+            if (nextCol !== col) {
+              navigateToCol(nextCol);
+              playDecide();
+            }
+          }
           break;
         case 'ArrowUp':
           if (!subMenusEnabled || !focusSubRowRef?.current || subItems.length === 0) return;
           e.preventDefault();
-          setSubRow(Math.max(0, getSubRow() - 1));
+          {
+            const nextSubRow = Math.max(0, getSubRow() - 1);
+            if (nextSubRow !== getSubRow()) {
+              setSubRow(nextSubRow);
+              playDecide();
+            }
+          }
           break;
         case 'ArrowDown':
           if (!subMenusEnabled || !focusSubRowRef?.current || subItems.length === 0) return;
           e.preventDefault();
-          setSubRow(Math.min(maxSubRow, getSubRow() + 1));
+          {
+            const nextSubRow = Math.min(maxSubRow, getSubRow() + 1);
+            if (nextSubRow !== getSubRow()) {
+              setSubRow(nextSubRow);
+              playDecide();
+            }
+          }
           break;
         case 'Enter':
         case ' ':
@@ -165,14 +236,22 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
               setDepth(1);
               photoGridFocusRef.current.row = 0;
               photoGridFocusRef.current.col = 0;
+              playDecide();
+              break;
+            }
+            if (subItem?.type === 'photo' && subItem?.src) {
+              setDepth(1);
+              photoViewerOpenRef.current = true;
+              playDecide();
               break;
             }
             if (subItem?.type === 'launcher' && subItem?.href) {
-              window.location.href = subItem.href;
+              window.open(subItem.href, '_blank', 'noopener,noreferrer');
               break;
             }
             if (subItem?.type === 'describe') {
               fullscreenOpenRef.current = true;
+              playDecide();
               break;
             }
             break;
@@ -195,6 +274,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
           if (depth > 0) {
             e.preventDefault();
             setDepth(0);
+            playCancel();
           }
           break;
         default:

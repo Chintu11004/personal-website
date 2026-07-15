@@ -100,7 +100,7 @@ const SubItem = memo(function SubItem({
     initialLabelOpacity,
   });
 
-  const texture = useLoader(THREE.TextureLoader, item.image ?? DEFAULT_SUB_ICON);
+  const texture = useLoader(THREE.TextureLoader, item.image ?? item.src ?? DEFAULT_SUB_ICON);
 
   useEffect(() => {
     texture.colorSpace = THREE.LinearSRGBColorSpace;
