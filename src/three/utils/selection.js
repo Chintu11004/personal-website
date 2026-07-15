@@ -18,3 +18,16 @@ export function isLauncherIdleCandidate(focusColRef, focusSubRowRef) {
   if (!items?.length) return false;
   return getFocusedSubItem(focusColRef, focusSubRowRef)?.type === 'launcher';
 }
+
+export function getSubItemPhotos(item) {
+  if (!item) return [];
+  if (item.type === 'folder') return item.photos ?? [];
+  if (item.type === 'photo' && item.src) {
+    return [{
+      src: item.src,
+      title: item.title ?? item.label ?? '',
+      date: item.date ?? '',
+    }];
+  }
+  return [];
+}
