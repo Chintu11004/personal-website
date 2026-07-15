@@ -41,7 +41,7 @@ export function unlockUiAudio(sources) {
   }
 }
 
-export async function playUiSound(src) {
+export async function playUiSound(src, volume = 1) {
   const ctx = getContext();
   let buffer = buffers.get(src);
 
@@ -63,8 +63,12 @@ export async function playUiSound(src) {
 
   try {
     const source = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    gain.gain.value = volume;
+
     source.buffer = buffer;
-    source.connect(ctx.destination);
+    source.connect(gain);
+    gain.connect(ctx.destination);
     source.start(0);
     return true;
   } catch {

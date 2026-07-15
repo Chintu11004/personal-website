@@ -8,11 +8,21 @@
   position: relative;
   width: 58vw;
   height: 100vh;
+  /* Cancels out with .photo-grid-panel__scaled's padding-top below, both applied
+     BEFORE any transform scale so the anchor alignment stays scale-independent. */
   margin-top: calc(-1 * var(--photo-grid-anchor-top, 0px));
+  padding-top: var(--photo-grid-anchor-top, 0px);
   background: transparent;
   pointer-events: none;
   user-select: none;
   overflow: visible;
+}
+
+/* Scaled content wrapper: sits exactly at the anchor point (thanks to the
+   margin/padding cancellation above), so everything inside can use simple
+   local coordinates and shrink/grow uniformly from that top-left origin. */
+.photo-grid-panel__scaled {
+  position: relative;
 }
 
 .photo-grid {
@@ -25,7 +35,6 @@
   position: relative;
   height: 100vh;
   overflow: visible;
-  padding-top: var(--photo-grid-anchor-top, 0px);
   padding-left: 12px;
   padding-right: 12px;
 }

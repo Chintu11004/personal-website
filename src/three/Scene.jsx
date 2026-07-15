@@ -17,6 +17,7 @@ import { CAMERA } from './cameraConfig';
 export const Scene = memo( function Scene({ booted, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, fullscreenPanelVisibleRef, fullscreenOpenRef, photoGridPanelVisibleRef, focusCol, exitingCols, removingExitingCols, photoGridFocusRef, photoViewerOpenRef, introBackgroundOpacityRef, introRibbonOpacityRef, introUiOpacityRef, introCompleteRef, subMenuEnabledRef, onSubMenusEnabled, onIntroComplete, subMenusEnabled, introLogoMounted }) {
   const size = useThree((state) => state.size);
   const camera = useThree((state) => state.camera);
+  const invalidate = useThree((state) => state.invalidate);
   const aspect = size.width / size.height;
   const frustumHalf = CAMERA.frustumSize / 2;
 
@@ -28,7 +29,8 @@ export const Scene = memo( function Scene({ booted, focusColRef, focusSubRowRef,
     camera.top = frustumHalf;
     camera.bottom = -frustumHalf;
     camera.updateProjectionMatrix();
-  }, [aspect, frustumHalf, camera]);
+    invalidate();
+  }, [aspect, frustumHalf, camera, invalidate]);
 
   return (
     <>

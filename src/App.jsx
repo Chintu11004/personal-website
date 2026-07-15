@@ -5,7 +5,7 @@ import Clock from './components/Clock';
 import './App.css';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { navItems } from './three/navItems';
-import { NAV_CANCEL_AUDIO, NAV_DECIDE_AUDIO, STARTUP_AUDIO } from './three/introConfig';
+import { NAV_CANCEL_AUDIO, NAV_DECIDE_AUDIO, STARTUP_AUDIO, STARTUP_AUDIO_VOLUME } from './three/introConfig';
 import { playUiSound, preloadUiSound, unlockUiAudio } from './utils/uiSound';
 
 const BOOT_SOUNDS = [STARTUP_AUDIO, NAV_DECIDE_AUDIO, NAV_CANCEL_AUDIO];
@@ -44,7 +44,7 @@ function App() {
       bootedRef.current = true;
       setBooted(true);
       unlockUiAudio(BOOT_SOUNDS);
-      void playUiSound(STARTUP_AUDIO);
+      void playUiSound(STARTUP_AUDIO, STARTUP_AUDIO_VOLUME);
     };
 
     window.addEventListener('keydown', onKeyDown, true);

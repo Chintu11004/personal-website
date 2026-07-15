@@ -35,6 +35,7 @@ export const INTRO_PANEL_CONTENT = {
 };
 
 export const STARTUP_AUDIO = '/music/start-up.mp3';
+export const STARTUP_AUDIO_VOLUME = 1.8;
 export const NAV_DECIDE_AUDIO = '/music/decide.mp3';
 export const NAV_CANCEL_AUDIO = '/music/cancel.mp3';
 
