@@ -7,6 +7,7 @@ import { IconLabel } from './IconLabel';
 import { useIconShaders } from './hooks/useIconShaders';
 import { SELECTION, useSelectionAnimation } from './hooks/useSelectionAnimation';
 import { lerp, lerpFactor } from './utils/animation';
+import { getIconIntroProgress, INTRO } from './introConfig';
 import { navItems } from './navItems';
 
 const LAYOUT = {
@@ -24,11 +25,13 @@ function iconBodyPropsAreEqual(prev, next) {
     prev.focusColRef === next.focusColRef &&
     prev.navDepthRef === next.navDepthRef &&
     prev.fullscreenPanelVisibleRef === next.fullscreenPanelVisibleRef &&
+    prev.introCompleteRef === next.introCompleteRef &&
+    prev.subMenusEnabled === next.subMenusEnabled &&
     prev.shaders === next.shaders
   );
 }
 
-const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, navDepthRef, fullscreenPanelVisibleRef, shaders }) {
+const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, navDepthRef, fullscreenPanelVisibleRef, introCompleteRef, shaders }) {
   const focusCol = focusColRef.current?.value ?? 0;
   const colOffset = index - focusCol;
   const isSelected = index === focusCol;
@@ -37,10 +40,8 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, na
     LAYOUT.verticalOffset,
     0
   );
-  const initialScale = isSelected ? SELECTION.selectedScale : SELECTION.unselectedScale;
-  const initialShaderOpacity = isSelected ? SELECTION.selectedOpacity : SELECTION.unselectedOpacity;
-  const initialLabelOpacity = isSelected ? SELECTION.labelSelectedOpacity : SELECTION.labelUnselectedOpacity;
-
+  const baseScale = isSelected ? SELECTION.selectedScale : SELECTION.unselectedScale;
+  const iconIntroOpacity = useRef(0);
   const targetPosition = useRef(initialPosition.clone());
   const currentPosition = useRef(initialPosition.clone());
   const contentRef = useRef();
@@ -53,9 +54,10 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, na
     materialRef,
     htmlRef,
     positionRef: contentRef,
-    initialScale,
-    initialShaderOpacity,
-    initialLabelOpacity,
+    initialScale: baseScale * INTRO.iconScaleStart,
+    initialShaderOpacity: 0,
+    initialLabelOpacity: 0,
+    masterOpacity: iconIntroOpacity,
   });
 
   const texture = useLoader(THREE.TextureLoader, item.image);
@@ -80,6 +82,11 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, na
     const depth = navDepthRef?.current?.value ?? 0;
     const hide = 1 - (fullscreenPanelVisibleRef?.current?.value ?? 0);
     const t = lerpFactor(delta);
+    const { opacity: introOpacity, scale: introScale } = introCompleteRef?.current
+      ? { opacity: 1, scale: 1 }
+      : getIconIntroProgress(state.clock.elapsedTime, index);
+
+    iconIntroOpacity.current = introOpacity;
 
     targetPosition.current.set((colOffset * LAYOUT.spacing) - 0.64, LAYOUT.verticalOffset, 0);
 
@@ -92,10 +99,14 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, na
     step(delta, state.camera.position, {
       isSelected,
       targetX: isSelected && (depth > 0) ? LAYOUT.depthSelect_OffsetX : depth > 0 ? LAYOUT.depthUnselect_OffsetX : 0,
-      targetScale: isSelected ? SELECTION.selectedScale : (depth > 0) ? SELECTION.depthUnselectedScale : SELECTION.unselectedScale,
+      targetScale: (isSelected ? SELECTION.selectedScale : (depth > 0) ? SELECTION.depthUnselectedScale : SELECTION.unselectedScale) * introScale,
       targetShaderOpacity: (isSelected ? SELECTION.selectedOpacity : (depth > 0) ? SELECTION.depthUnselectedOpacity : SELECTION.unselectedOpacity) * hide,
       targetLabelOpacity: (isSelected ? SELECTION.labelSelectedOpacity : SELECTION.labelUnselectedOpacity) * hide,
     });
+
+    if (!introCompleteRef?.current) {
+      state.invalidate();
+    }
   }, -1);
 
   return (
@@ -118,11 +129,11 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, na
   );
 }, iconBodyPropsAreEqual);
 
-function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, fullscreenPanelVisibleRef, shaders }) {
+function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, fullscreenPanelVisibleRef, introCompleteRef, subMenusEnabled, shaders }) {
   const groupRef = useRef();
   const isActive = index === focusCol;
   const isExiting = exitingCols.includes(index);
-  const showSubMenu = item.items?.length > 0 && (isActive || isExiting);
+  const showSubMenu = subMenusEnabled && item.items?.length > 0 && (isActive || isExiting);
 
   const handleExitComplete = useCallback(() => {
     removingExitingCols(index);
@@ -137,6 +148,7 @@ function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusCo
         focusColRef={focusColRef}
         navDepthRef={navDepthRef}
         fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
+        introCompleteRef={introCompleteRef}
         shaders={shaders}
       />
       {showSubMenu && (
@@ -166,6 +178,8 @@ export const NavIcons = memo(function NavIcons({
   navDepthRef,
   contentPanelVisibleRef,
   fullscreenPanelVisibleRef,
+  introCompleteRef,
+  subMenusEnabled,
 }) {
   const shaders = useIconShaders();
 
@@ -183,6 +197,8 @@ export const NavIcons = memo(function NavIcons({
           navDepthRef={navDepthRef}
           contentPanelVisibleRef={contentPanelVisibleRef}
           fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
+          introCompleteRef={introCompleteRef}
+          subMenusEnabled={subMenusEnabled}
           shaders={shaders}
           focusCol={focusCol}
           exitingCols={exitingCols}

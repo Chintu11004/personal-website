@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import './Clock.css';
 
-function Clock({ contentPanelVisibleRef, photoViewerOpenRef, fullscreenOpenRef }) {
+function Clock({ contentPanelVisibleRef, photoViewerOpenRef, fullscreenOpenRef, introUiOpacityRef }) {
   const [time, setTime] = useState(new Date());
-  const [opacity, setOpacity] = useState(1);
+  const [opacity, setOpacity] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -20,14 +20,15 @@ function Clock({ contentPanelVisibleRef, photoViewerOpenRef, fullscreenOpenRef }
       const panelVisible = contentPanelVisibleRef?.current?.value ?? 0;
       const fullscreenOpen = fullscreenOpenRef?.current ?? false;
       const viewerOpen = photoViewerOpenRef?.current ?? false;
-      setOpacity(viewerOpen || fullscreenOpen ? 0 : 1 - panelVisible);
+      const introUi = introUiOpacityRef?.current?.value ?? 1;
+      setOpacity((viewerOpen || fullscreenOpen ? 0 : 1 - panelVisible) * introUi);
       frameId = requestAnimationFrame(updateOpacity);
     };
 
     updateOpacity();
 
     return () => cancelAnimationFrame(frameId);
-  }, [contentPanelVisibleRef, photoViewerOpenRef, fullscreenOpenRef]);
+  }, [contentPanelVisibleRef, photoViewerOpenRef, fullscreenOpenRef, introUiOpacityRef]);
 
   const formatTime = (date) => {
     const hours = date.getHours();

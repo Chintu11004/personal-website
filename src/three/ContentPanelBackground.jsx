@@ -53,12 +53,15 @@ export const ContentPanelBackground = memo(function ContentPanelBackground({
   focusColRef,
   focusSubRowRef,
   contentPanelVisibleRef,
+  introCompleteRef,
 }) {
   const shaders = useBackgroundShader();
   const lastFingerprint = useRef('');
   const [bgUrl, setBgUrl] = useState(null);
 
   useFrame(() => {
+    if (!introCompleteRef?.current) return;
+
     const fingerprint = getSelectionFingerprint(focusColRef, focusSubRowRef);
     if (fingerprint !== lastFingerprint.current) {
       lastFingerprint.current = fingerprint;

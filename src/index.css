@@ -7,7 +7,6 @@
 body {
   font-family: var(--font-sans);
   overflow: hidden;
-  background: #000a5b;
 }
 
 #root {
@@ -18,5 +17,4 @@ body {
 
 canvas {
   display: block;
-  background: transparent;
 }

@@ -7,7 +7,7 @@ import fragmentShader from '../shaders/fragment.glsl?raw';
 const PLANE_WIDTH = 4;
 const PLANE_HEIGHT = 1;
 
-export function BackgroundRibbon({ contentPanelVisibleRef }) {
+export function BackgroundRibbon({ contentPanelVisibleRef, introRibbonOpacityRef }) {
   const materialRef = useRef(null);
   const scene = useThree((state) => state.scene);
   const camera = useThree((state) => state.camera);
@@ -29,7 +29,7 @@ export function BackgroundRibbon({ contentPanelVisibleRef }) {
         u_displacement: { value: 0.8 },
         u_amplitude: { value: 0.3 },
         u_planeWidth: { value: PLANE_WIDTH },
-        u_opacity: { value: 1.0 },
+        u_opacity: { value: 0.0 },
       },
       vertexShader,
       fragmentShader,
@@ -61,7 +61,8 @@ export function BackgroundRibbon({ contentPanelVisibleRef }) {
     materialRef.current.uniforms.u_time.value = state.clock.elapsedTime;
 
     const contentVisible = contentPanelVisibleRef?.current?.value ?? 0;
-    materialRef.current.uniforms.u_opacity.value = 1 - contentVisible;
+    const intro = introRibbonOpacityRef?.current?.value ?? 1;
+    materialRef.current.uniforms.u_opacity.value = (1 - contentVisible) * intro;
 
     // Ribbon is continuously animated; keep the demand loop alive.
     state.invalidate();

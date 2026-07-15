@@ -3,8 +3,9 @@ import { Scene } from './three/Scene';
 import XMBNav from './components/XMBNav';
 import Clock from './components/Clock';
 import './App.css';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { navItems } from './three/navItems';
+import { STARTUP_AUDIO } from './three/introConfig';
 
 function App() {
   const [focusCol, setFocusCol] = useState(4);
@@ -18,6 +19,24 @@ function App() {
   const photoGridPanelVisibleRef = useRef({ value: 0 });
   const photoGridFocusRef = useRef({ row: 0, col: 0 });
   const photoViewerOpenRef = useRef(false);
+  const introBackgroundOpacityRef = useRef({ value: 0 });
+  const introRibbonOpacityRef = useRef({ value: 0 });
+  const introUiOpacityRef = useRef({ value: 0 });
+  const introCompleteRef = useRef(false);
+  const subMenuEnabledRef = useRef(false);
+  const [subMenusEnabled, setSubMenusEnabled] = useState(false);
+  const [introLogoMounted, setIntroLogoMounted] = useState(true);
+  const enableSubMenus = useCallback(() => setSubMenusEnabled(true), []);
+  const finishIntro = useCallback(() => setIntroLogoMounted(false), []);
+
+  useEffect(() => {
+    const audio = new Audio(STARTUP_AUDIO);
+    audio.play().catch(() => {});
+    return () => {
+      audio.pause();
+      audio.src = '';
+    };
+  }, []);
 
   const removingExitingCol = useCallback((colIndex) => {
     setExitingCols((prev) => prev.filter((c) => c !== colIndex));
@@ -42,16 +61,14 @@ function App() {
 
   return (
     <>
-      <div className="app-background" aria-hidden="true" />
       <Canvas
         frameloop="demand"
-        gl={{ antialias: true, alpha: true, premultipliedAlpha: false }}
-        onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
+        gl={{ antialias: true, alpha: false }}
+        onCreated={({ gl }) => gl.setClearColor(0x000000, 1)}
         style={{
           position: 'fixed',
           inset: 0,
           zIndex: 1,
-          background: 'transparent',
         }}
       >
         <Scene
@@ -67,6 +84,15 @@ function App() {
           removingExitingCols={removingExitingCol}
           photoGridFocusRef={photoGridFocusRef}
           photoViewerOpenRef={photoViewerOpenRef}
+          introBackgroundOpacityRef={introBackgroundOpacityRef}
+          introRibbonOpacityRef={introRibbonOpacityRef}
+          introUiOpacityRef={introUiOpacityRef}
+          introCompleteRef={introCompleteRef}
+          subMenuEnabledRef={subMenuEnabledRef}
+          onSubMenusEnabled={enableSubMenus}
+          onIntroComplete={finishIntro}
+          subMenusEnabled={subMenusEnabled}
+          introLogoMounted={introLogoMounted}
         />
       </Canvas>
       <XMBNav
@@ -77,11 +103,14 @@ function App() {
         photoGridFocusRef={photoGridFocusRef}
         photoViewerOpenRef={photoViewerOpenRef}
         fullscreenOpenRef={fullscreenOpenRef}
+        introCompleteRef={introCompleteRef}
+        subMenusEnabled={subMenusEnabled}
       />
       <Clock
         contentPanelVisibleRef={contentPanelVisibleRef}
         photoViewerOpenRef={photoViewerOpenRef}
         fullscreenOpenRef={fullscreenOpenRef}
+        introUiOpacityRef={introUiOpacityRef}
       />
     </>
   );

@@ -12,10 +12,11 @@ function setPhotoIndex(index, photoGridFocusRef) {
   photoGridFocusRef.current.col = index % GRID_COLS;
 }
 
-function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photoGridFocusRef, photoViewerOpenRef, fullscreenOpenRef }) {
+function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photoGridFocusRef, photoViewerOpenRef, fullscreenOpenRef, introCompleteRef, subMenusEnabled }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!focusColRef.current) return;
+      if (!introCompleteRef?.current) return;
 
       if (fullscreenOpenRef?.current) {
         switch (e.key) {
@@ -146,19 +147,19 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
           navigateToCol(Math.min(navItems.length - 1, col + 1));
           break;
         case 'ArrowUp':
-          if (!focusSubRowRef?.current || subItems.length === 0) return;
+          if (!subMenusEnabled || !focusSubRowRef?.current || subItems.length === 0) return;
           e.preventDefault();
           setSubRow(Math.max(0, getSubRow() - 1));
           break;
         case 'ArrowDown':
-          if (!focusSubRowRef?.current || subItems.length === 0) return;
+          if (!subMenusEnabled || !focusSubRowRef?.current || subItems.length === 0) return;
           e.preventDefault();
           setSubRow(Math.min(maxSubRow, getSubRow() + 1));
           break;
         case 'Enter':
         case ' ':
           e.preventDefault();
-          if (subItems.length > 0 && depth === 0) {
+          if (subMenusEnabled && subItems.length > 0 && depth === 0) {
             const subItem = subItems[getSubRow()];
             if (subItem?.type === 'folder') {
               setDepth(1);
@@ -203,7 +204,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photoGridFocusRef, photoViewerOpenRef, fullscreenOpenRef]);
+  }, [focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photoGridFocusRef, photoViewerOpenRef, fullscreenOpenRef, introCompleteRef, subMenusEnabled]);
 
   return (
     <nav className="xmb-nav" aria-label="Main navigation">

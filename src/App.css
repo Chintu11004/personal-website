@@ -10,15 +10,3 @@
   padding: 0;
   box-sizing: border-box;
 }
-
-.app-background {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background: radial-gradient(
-    ellipse 150% 120% at 75% 20%,
-    #000a5b 0%,
-    #000a5b 20%,
-    #3357b7 100%
-  );
-}

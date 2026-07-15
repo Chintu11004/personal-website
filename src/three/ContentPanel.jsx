@@ -15,7 +15,12 @@ export const HIDDEN_OFFSET_X = 0.12;
 // Focused icon (-0.69, 0.32) + selected submenu local (-0.37, -0.27) + panel offset (0.85, 0)
 const POSITION = [0.28, -0.21, 0];
 
-export const ContentPanel = memo(function ContentPanel({ focusColRef, focusSubRowRef, contentPanelVisibleRef }) {
+export const ContentPanel = memo(function ContentPanel({
+  focusColRef,
+  focusSubRowRef,
+  contentPanelVisibleRef,
+  introCompleteRef,
+}) {
   const groupRef = useRef();
   const htmlRef = useRef();
   const opacity = useRef(0);
@@ -33,14 +38,16 @@ export const ContentPanel = memo(function ContentPanel({ focusColRef, focusSubRo
       setContent(getFocusedSubItem(focusColRef, focusSubRowRef)?.content ?? null);
     }
 
-    if (isLauncherIdleCandidate(focusColRef, focusSubRowRef)) {
+    if (!introCompleteRef?.current) {
+      idleTime.current = 0;
+    } else if (isLauncherIdleCandidate(focusColRef, focusSubRowRef)) {
       idleTime.current = Math.min(idleTime.current + delta, IDLE_DELAY);
-    }
-    else {
+    } else {
       idleTime.current = 0;
     }
 
-    const shouldShow = idleTime.current >= IDLE_DELAY;
+    const shouldShow =
+      introCompleteRef?.current && idleTime.current >= IDLE_DELAY;
     groupRef.current?.position.set(
       POSITION[0] + slideX.current,
       POSITION[1],
