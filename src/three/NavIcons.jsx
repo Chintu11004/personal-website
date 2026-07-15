@@ -141,16 +141,18 @@ function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusCo
 
   return (
     <group ref={groupRef}>
-      <IconBody
-        index={index}
-        item={item}
-        groupRef={groupRef}
-        focusColRef={focusColRef}
-        navDepthRef={navDepthRef}
-        fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
-        introCompleteRef={introCompleteRef}
-        shaders={shaders}
-      />
+      <Suspense fallback={null}>
+        <IconBody
+          index={index}
+          item={item}
+          groupRef={groupRef}
+          focusColRef={focusColRef}
+          navDepthRef={navDepthRef}
+          fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
+          introCompleteRef={introCompleteRef}
+          shaders={shaders}
+        />
+      </Suspense>
       {showSubMenu && (
         <VerticalSubMenu
           items={item.items}
@@ -186,7 +188,7 @@ export const NavIcons = memo(function NavIcons({
   if (!shaders?.normal || !shaders?.thumbnail) return null;
 
   return (
-    <Suspense fallback={null}>
+    <>
       {navItems.map((item, index) => (
         <Icon
           key={index}
@@ -205,6 +207,6 @@ export const NavIcons = memo(function NavIcons({
           removingExitingCols={removingExitingCols}
         />
       ))}
-    </Suspense>
+    </>
   );
 });

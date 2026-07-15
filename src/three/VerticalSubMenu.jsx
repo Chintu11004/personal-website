@@ -1,4 +1,4 @@
-import { memo, useEffect, useLayoutEffect, useRef } from 'react';
+import { memo, Suspense, useEffect, useLayoutEffect, useRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { IconShaderMesh } from './IconShaderMesh';
@@ -234,19 +234,20 @@ export const VerticalSubMenu = memo(function VerticalSubMenu({
   return (
     <>
       {items.map((item, index) => (
-        <SubItem
-          key={index}
-          index={index}
-          item={item}
-          colIndex={colIndex}
-          masterOpacity={masterOpacity}
-          focusSubRowRef={focusSubRowRef}
-          focusColRef={focusColRef}
-          navDepthRef={navDepthRef}
-          contentPanelVisibleRef={contentPanelVisibleRef}
-          fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
-          shaders={shaders}
-        />
+        <Suspense key={index} fallback={null}>
+          <SubItem
+            index={index}
+            item={item}
+            colIndex={colIndex}
+            masterOpacity={masterOpacity}
+            focusSubRowRef={focusSubRowRef}
+            focusColRef={focusColRef}
+            navDepthRef={navDepthRef}
+            contentPanelVisibleRef={contentPanelVisibleRef}
+            fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
+            shaders={shaders}
+          />
+        </Suspense>
       ))}
     </>
   );

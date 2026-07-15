@@ -6,11 +6,13 @@ import './App.css';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { navItems } from './three/navItems';
 import { NAV_CANCEL_AUDIO, NAV_DECIDE_AUDIO, STARTUP_AUDIO, STARTUP_AUDIO_VOLUME } from './three/introConfig';
+import { preloadNavTextures } from './three/utils/preloadNavTextures';
 import { playUiSound, preloadUiSound, unlockUiAudio } from './utils/uiSound';
 
 const BOOT_SOUNDS = [STARTUP_AUDIO, NAV_DECIDE_AUDIO, NAV_CANCEL_AUDIO];
 
 preloadUiSound(STARTUP_AUDIO);
+preloadNavTextures();
 
 function App() {
   const [focusCol, setFocusCol] = useState(4);
