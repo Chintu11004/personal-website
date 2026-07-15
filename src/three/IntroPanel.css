@@ -1,9 +1,17 @@
 .intro-panel {
+  --panel-boot-text-width: 80vw;
+  --panel-intro-text-width: 65vw;
+  --panel-text-width: var(--panel-boot-text-width);
+  --panel-inline-padding: 48px;
   position: relative;
   width: 100%;
   height: 100%;
   pointer-events: none;
   user-select: none;
+}
+
+.intro-panel--intro {
+  --panel-text-width: var(--panel-intro-text-width);
 }
 
 .intro-panel__backdrop {
@@ -14,23 +22,35 @@
   will-change: backdrop-filter;
 }
 
-.intro-panel__text {
+.intro-panel__content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.intro-panel__body {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  padding-inline: var(--panel-inline-padding);
+}
+
+.intro-panel__text-wrap {
+  margin: 0 auto;
+  width: 100%;
+  max-width: var(--panel-text-width);
+}
+
+.intro-panel__text {
   margin: 0;
-  padding: 48px;
-  max-width: 42rem;
-  margin-inline: auto;
-  text-align: center;
+  text-align: left;
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: 1.15rem;
   font-weight: 400;
   line-height: 1.65;
   letter-spacing: 0.01em;
   color: rgba(255, 255, 255, 0.9);
   white-space: pre-line;
-  opacity: 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
 }

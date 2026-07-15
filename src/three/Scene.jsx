@@ -14,7 +14,7 @@ import { IntroLogo } from './IntroLogo';
 import { IntroPanel } from './IntroPanel';
 import { CAMERA } from './cameraConfig';
 
-export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, fullscreenPanelVisibleRef, fullscreenOpenRef, photoGridPanelVisibleRef, focusCol, exitingCols, removingExitingCols, photoGridFocusRef, photoViewerOpenRef, introBackgroundOpacityRef, introRibbonOpacityRef, introUiOpacityRef, introCompleteRef, subMenuEnabledRef, onSubMenusEnabled, onIntroComplete, subMenusEnabled, introLogoMounted }) {
+export const Scene = memo( function Scene({ booted, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, fullscreenPanelVisibleRef, fullscreenOpenRef, photoGridPanelVisibleRef, focusCol, exitingCols, removingExitingCols, photoGridFocusRef, photoViewerOpenRef, introBackgroundOpacityRef, introRibbonOpacityRef, introUiOpacityRef, introCompleteRef, subMenuEnabledRef, onSubMenusEnabled, onIntroComplete, subMenusEnabled, introLogoMounted }) {
   const size = useThree((state) => state.size);
   const camera = useThree((state) => state.camera);
   const aspect = size.width / size.height;
@@ -45,7 +45,7 @@ export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDept
         introRibbonOpacityRef={introRibbonOpacityRef}
       />
       {introLogoMounted && <IntroLogo />}
-      <IntroPanel />
+      <IntroPanel booted={booted} />
       <ContentPanelBackground
         focusColRef={focusColRef}
         focusSubRowRef={focusSubRowRef}
@@ -91,6 +91,7 @@ export const Scene = memo( function Scene({ focusColRef, focusSubRowRef, navDept
         subMenusEnabled={subMenusEnabled}
       />
       <IntroController
+        booted={booted}
         introBackgroundOpacityRef={introBackgroundOpacityRef}
         introRibbonOpacityRef={introRibbonOpacityRef}
         introUiOpacityRef={introUiOpacityRef}

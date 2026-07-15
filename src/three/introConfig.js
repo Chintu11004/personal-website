@@ -17,7 +17,7 @@ export const INTRO = {
 
   uiStart: 13.5,
   uiDuration: 0.8,
-  completeAt: 15.0,
+  completeAt: 17.0,
 
   introPanelStart: 7.5,
   introPanelDuration: 5,
@@ -26,8 +26,12 @@ export const INTRO = {
   subMenuDelay: 1,
 };
 
+export const BOOT_PANEL_CONTENT = {
+  text: 'Press Enter to Boot',
+};
+
 export const INTRO_PANEL_CONTENT = {
-  text: 'This fullscreen panel appears at 10 seconds and hides after 5.',
+  text: 'PHOTOSENSITIVE EPILEPSY\nIF YOU HAVE A HISTORY OF EPILEPSY OR SEIZURES, CONSULT A DOCTOR BEFORE USE. CERTAIN PATTERNS MAY TRIGGER SEIZURES WITH NO PRIOR HISTORY. BEFORE USING THIS PRODUCT, CAREFULLY READ THE INSTRUCTION MANUAL.',
 };
 
 export const STARTUP_AUDIO = '/music/start-up.mp3';

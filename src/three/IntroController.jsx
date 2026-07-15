@@ -1,9 +1,10 @@
-import { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
 import { INTRO, getRibbonOpacity, getBackgroundOpacity, getSubMenuEnabledAt, isIntroPanelVisible } from './introConfig';
 import { navItems } from './navItems';
 
 export function IntroController({
+  booted,
   introBackgroundOpacityRef,
   introRibbonOpacityRef,
   introUiOpacityRef,
@@ -15,8 +16,27 @@ export function IntroController({
   const introDone = useRef(false);
   const subMenuDone = useRef(false);
   const subMenuEnabledAt = getSubMenuEnabledAt(navItems.length);
+  const { clock, invalidate } = useThree();
+
+  useLayoutEffect(() => {
+    clock.stop();
+    invalidate();
+  }, [clock, invalidate]);
+
+  useEffect(() => {
+    if (!booted) return;
+
+    clock.elapsedTime = 0;
+    clock.start();
+    invalidate();
+  }, [booted, clock, invalidate]);
 
   useFrame((state) => {
+    if (!booted) {
+      state.invalidate();
+      return;
+    }
+
     const t = state.clock.elapsedTime;
 
     introRibbonOpacityRef.current.value = getRibbonOpacity(t);
@@ -39,7 +59,7 @@ export function IntroController({
       onSubMenusEnabled?.();
     }
 
-    if (!introCompleteRef.current || !subMenuEnabledRef.current || isIntroPanelVisible(t)) {
+    if (!booted || !introCompleteRef.current || !subMenuEnabledRef.current || isIntroPanelVisible(t)) {
       state.invalidate();
     }
   });

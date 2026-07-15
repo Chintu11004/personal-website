@@ -41,23 +41,33 @@ export function unlockUiAudio(sources) {
   }
 }
 
-export function playUiSound(src) {
+export async function playUiSound(src) {
   const ctx = getContext();
-  const buffer = buffers.get(src);
+  let buffer = buffers.get(src);
 
   if (!buffer) {
-    void loadBuffer(src)
-      .then(() => playUiSound(src))
-      .catch(() => {});
-    return;
+    try {
+      buffer = await loadBuffer(src);
+    } catch {
+      return false;
+    }
   }
 
   if (ctx.state === 'suspended') {
-    void ctx.resume().catch(() => {});
+    try {
+      await ctx.resume();
+    } catch {
+      return false;
+    }
   }
 
-  const source = ctx.createBufferSource();
-  source.buffer = buffer;
-  source.connect(ctx.destination);
-  source.start(0);
+  try {
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(ctx.destination);
+    source.start(0);
+    return true;
+  } catch {
+    return false;
+  }
 }

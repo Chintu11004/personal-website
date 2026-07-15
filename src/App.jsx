@@ -5,7 +5,12 @@ import Clock from './components/Clock';
 import './App.css';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { navItems } from './three/navItems';
-import { STARTUP_AUDIO } from './three/introConfig';
+import { NAV_CANCEL_AUDIO, NAV_DECIDE_AUDIO, STARTUP_AUDIO } from './three/introConfig';
+import { playUiSound, preloadUiSound, unlockUiAudio } from './utils/uiSound';
+
+const BOOT_SOUNDS = [STARTUP_AUDIO, NAV_DECIDE_AUDIO, NAV_CANCEL_AUDIO];
+
+preloadUiSound(STARTUP_AUDIO);
 
 function App() {
   const [focusCol, setFocusCol] = useState(4);
@@ -26,16 +31,24 @@ function App() {
   const subMenuEnabledRef = useRef(false);
   const [subMenusEnabled, setSubMenusEnabled] = useState(false);
   const [introLogoMounted, setIntroLogoMounted] = useState(true);
+  const [booted, setBooted] = useState(false);
+  const bootedRef = useRef(false);
   const enableSubMenus = useCallback(() => setSubMenusEnabled(true), []);
   const finishIntro = useCallback(() => setIntroLogoMounted(false), []);
 
   useEffect(() => {
-    const audio = new Audio(STARTUP_AUDIO);
-    audio.play().catch(() => {});
-    return () => {
-      audio.pause();
-      audio.src = '';
+    const onKeyDown = (e) => {
+      if (bootedRef.current || e.key !== 'Enter') return;
+
+      e.preventDefault();
+      bootedRef.current = true;
+      setBooted(true);
+      unlockUiAudio(BOOT_SOUNDS);
+      void playUiSound(STARTUP_AUDIO);
     };
+
+    window.addEventListener('keydown', onKeyDown, true);
+    return () => window.removeEventListener('keydown', onKeyDown, true);
   }, []);
 
   const removingExitingCol = useCallback((colIndex) => {
@@ -64,7 +77,10 @@ function App() {
       <Canvas
         frameloop="demand"
         gl={{ antialias: true, alpha: false }}
-        onCreated={({ gl }) => gl.setClearColor(0x000000, 1)}
+        onCreated={({ gl, invalidate }) => {
+          gl.setClearColor(0x000000, 1);
+          invalidate();
+        }}
         style={{
           position: 'fixed',
           inset: 0,
@@ -72,6 +88,7 @@ function App() {
         }}
       >
         <Scene
+          booted={booted}
           focusColRef={focusColRef}
           focusSubRowRef={focusSubRowRef}
           navDepthRef={navDepthRef}
