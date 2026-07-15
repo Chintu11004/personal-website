@@ -8,8 +8,6 @@
   position: relative;
   width: 58vw;
   height: 100vh;
-  /* Cancels out with .photo-grid-panel__scaled's padding-top below, both applied
-     BEFORE any transform scale so the anchor alignment stays scale-independent. */
   margin-top: calc(-1 * var(--photo-grid-anchor-top, 0px));
   padding-top: var(--photo-grid-anchor-top, 0px);
   background: transparent;
@@ -18,15 +16,8 @@
   overflow: visible;
 }
 
-/* Scaled content wrapper: sits exactly at the anchor point (thanks to the
-   margin/padding cancellation above), so everything inside can use simple
-   local coordinates and shrink/grow uniformly from that top-left origin. */
-.photo-grid-panel__scaled {
-  position: relative;
-}
-
 .photo-grid {
-  --photo-grid-thumb-height: 125px;
+  --photo-grid-thumb-height: 15vh;
   width: 100%;
   height: 100%;
 }
@@ -37,6 +28,11 @@
   overflow: visible;
   padding-left: 12px;
   padding-right: 12px;
+}
+
+.photo-grid__viewport > .folder-connector-arrow {
+  left: calc(-12px - 4.5vw);
+  top: calc(var(--photo-grid-thumb-height) / 2);
 }
 
 .photo-grid__track {

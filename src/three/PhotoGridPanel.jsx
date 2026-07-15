@@ -1,24 +1,16 @@
 import { memo, useLayoutEffect, useRef, useState } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import { lerp, lerpFactor } from './utils/animation';
 import { getFocusedSubItem, getSelectionFingerprint } from './utils/selection';
-import { FolderConnectorArrow } from '../components/FolderConnectorArrow';
 import { PhotoGrid } from '../components/PhotoGrid';
 import '../components/PhotoGrid.css';
 
 export const HIDDEN_OFFSET_X = 0.12;
 const OPACITY_RESET_THRESHOLD = 0.01;
 
-const CONNECTOR_X = -75;
-const GRID_THUMB_HEIGHT = 125;
-
 // Anchors top-left of the grid beside the depth-1 folder icon
-// Tuned at reference window: 1512x859
 const POSITION = [-0.45, 0.16, 0];
-const REFERENCE_WIDTH = 1512;
-const REFERENCE_HEIGHT = 859;
-const PANEL_BASE_SCALE = 1;
 
 export const PhotoGridPanel = memo(function PhotoGridPanel({
   focusColRef,
@@ -39,9 +31,6 @@ export const PhotoGridPanel = memo(function PhotoGridPanel({
   const [photos, setPhotos] = useState([]);
   const [gridFocus, setGridFocus] = useState({ row: 0, col: 0 });
   const [anchorTop, setAnchorTop] = useState(0);
-  const size = useThree((state) => state.size);
-  const panelScaleY = (size.height / REFERENCE_HEIGHT) * PANEL_BASE_SCALE;
-  const panelScaleX = (REFERENCE_WIDTH / size.width) * panelScaleY;
 
   useLayoutEffect(() => {
     const measure = () => {
@@ -135,24 +124,12 @@ export const PhotoGridPanel = memo(function PhotoGridPanel({
           className="photo-grid-panel"
           style={{ '--photo-grid-anchor-top': `${anchorTop}px` }}
         >
-          <div
-            className="photo-grid-panel__scaled"
-            style={{
-              transform: `scale(${panelScaleX}, ${panelScaleY})`,
-              transformOrigin: 'top left',
-            }}
-          >
-            <FolderConnectorArrow
-              x={CONNECTOR_X}
-              y={GRID_THUMB_HEIGHT / 2}
-            />
-            <PhotoGrid
-              photos={photos}
-              focusRow={gridFocus.row}
-              focusCol={gridFocus.col}
-              cols={5}
-            />
-          </div>
+          <PhotoGrid
+            photos={photos}
+            focusRow={gridFocus.row}
+            focusCol={gridFocus.col}
+            cols={5}
+          />
         </div>
       </Html>
     </group>

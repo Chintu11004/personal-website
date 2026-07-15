@@ -1,12 +1,6 @@
 import { memo } from 'react';
 import './FolderConnectorArrow.css';
 
-export const FolderConnectorArrow = memo(function FolderConnectorArrow({ x, y }) {
-  return (
-    <div
-      className="folder-connector-arrow"
-      style={{ left: x, top: y }}
-      aria-hidden="true"
-    />
-  );
+export const FolderConnectorArrow = memo(function FolderConnectorArrow() {
+  return <div className="folder-connector-arrow" aria-hidden="true" />;
 });

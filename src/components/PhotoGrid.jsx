@@ -1,4 +1,5 @@
 import { memo, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { FolderConnectorArrow } from './FolderConnectorArrow';
 import './PhotoGrid.css';
 
 const GRID_ROW_GAP = 18;
@@ -61,6 +62,7 @@ export const PhotoGrid = memo(function PhotoGrid({ photos, focusRow, focusCol, c
   return (
     <div className="photo-grid">
       <div className="photo-grid__viewport" ref={viewportRef}>
+        <FolderConnectorArrow />
         <div
           className="photo-grid__track"
           style={{ transform: `translateY(${translateY}px)` }}

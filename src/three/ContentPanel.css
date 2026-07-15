@@ -13,14 +13,6 @@
   user-select: none;
 }
 
-/* Scaled content wrapper: transform stays off the outer box so top-left
-   anchoring stays scale-independent. */
-.content-panel__scaled {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
 .content-panel__fill {
   position: absolute;
   inset: 0;
