@@ -1,4 +1,4 @@
-import { memo, useRef } from 'react';
+import { memo, useCallback, useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import { BOOT_PANEL_CONTENT, INTRO_PANEL_CONTENT, isIntroPanelVisible } from './introConfig';
@@ -11,7 +11,7 @@ function screenCenterPosition(_, camera, size) {
   return [size.width / 2, size.height / 2];
 }
 
-export const IntroPanel = memo(function IntroPanel({ booted }) {
+export const IntroPanel = memo(function IntroPanel({ booted, onBoot, introCompleteRef }) {
   const htmlRef = useRef();
   const panelRef = useRef();
   const backdropRef = useRef();
@@ -19,6 +19,16 @@ export const IntroPanel = memo(function IntroPanel({ booted }) {
   const textRef = useRef();
   const opacity = useRef(0);
   const introShownRef = useRef(false);
+
+  const handleBootPointerDown = useCallback((e) => {
+    if (booted || e.button !== 0) return;
+    e.preventDefault();
+    onBoot?.();
+  }, [booted, onBoot]);
+
+  useEffect(() => () => {
+    document.body.style.cursor = '';
+  }, []);
 
   useFrame((state, delta) => {
     const bootVisible = !booted;
@@ -41,12 +51,14 @@ export const IntroPanel = memo(function IntroPanel({ booted }) {
 
     if (htmlRef.current) {
       htmlRef.current.style.visibility = opacity.current > 0.01 ? 'visible' : 'hidden';
+      htmlRef.current.style.pointerEvents = bootVisible ? 'auto' : 'none';
     }
     if (contentRef.current) {
       contentRef.current.style.opacity = String(opacity.current);
     }
     if (panelRef.current) {
       panelRef.current.classList.toggle('intro-panel--intro', introShownRef.current);
+      panelRef.current.classList.toggle('intro-panel--boot', bootVisible);
     }
     if (textRef.current) {
       textRef.current.textContent = introShownRef.current
@@ -58,6 +70,12 @@ export const IntroPanel = memo(function IntroPanel({ booted }) {
       const blurValue = `blur(${blur}px)`;
       backdropRef.current.style.backdropFilter = blurValue;
       backdropRef.current.style.webkitBackdropFilter = blurValue;
+    }
+
+    if (bootVisible) {
+      document.body.style.cursor = 'pointer';
+    } else if (!introCompleteRef?.current) {
+      document.body.style.cursor = '';
     }
 
     if (shouldShow || opacity.current > 0.01) {
@@ -73,7 +91,14 @@ export const IntroPanel = memo(function IntroPanel({ booted }) {
         calculatePosition={screenCenterPosition}
         style={{ pointerEvents: 'none' }}
       >
-        <div ref={panelRef} className="intro-panel" aria-live="polite">
+        <div
+          ref={panelRef}
+          className="intro-panel"
+          aria-live="polite"
+          onPointerDown={handleBootPointerDown}
+          role={booted ? undefined : 'button'}
+          tabIndex={booted ? undefined : -1}
+        >
           <div ref={backdropRef} className="intro-panel__backdrop" />
           <div ref={contentRef} className="intro-panel__content" style={{ opacity: 0 }}>
             <div className="intro-panel__body">

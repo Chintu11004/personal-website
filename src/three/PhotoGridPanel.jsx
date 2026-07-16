@@ -1,5 +1,5 @@
-import { memo, useLayoutEffect, useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import { lerp, lerpFactor } from './utils/animation';
 import { getFocusedSubItem, getSelectionFingerprint } from './utils/selection';
@@ -19,9 +19,11 @@ export const PhotoGridPanel = memo(function PhotoGridPanel({
   photoGridFocusRef,
   photoGridPanelVisibleRef,
   photoViewerOpenRef,
+  onPhotoClick,
 }) {
   const groupRef = useRef();
   const htmlRef = useRef();
+  const panelRef = useRef();
   const anchorRef = useRef();
   const opacity = useRef(0);
   const slideX = useRef(HIDDEN_OFFSET_X);
@@ -31,6 +33,18 @@ export const PhotoGridPanel = memo(function PhotoGridPanel({
   const [photos, setPhotos] = useState([]);
   const [gridFocus, setGridFocus] = useState({ row: 0, col: 0 });
   const [anchorTop, setAnchorTop] = useState(0);
+  const invalidate = useThree((state) => state.invalidate);
+
+  const handlePhotoClick = useCallback((index) => {
+    onPhotoClick?.(index);
+    if (photoGridFocusRef?.current) {
+      const row = Math.floor(index / 5);
+      const col = index % 5;
+      lastGridFocus.current = { row, col };
+      setGridFocus({ row, col });
+    }
+    invalidate();
+  }, [onPhotoClick, photoGridFocusRef, invalidate]);
 
   useLayoutEffect(() => {
     const measure = () => {
@@ -114,6 +128,10 @@ export const PhotoGridPanel = memo(function PhotoGridPanel({
     }
 
     if (htmlRef.current) htmlRef.current.style.opacity = String(opacity.current);
+    if (panelRef.current) {
+      panelRef.current.style.pointerEvents =
+        opacity.current > OPACITY_RESET_THRESHOLD ? 'auto' : 'none';
+    }
   }, -1);
 
   return (
@@ -121,6 +139,7 @@ export const PhotoGridPanel = memo(function PhotoGridPanel({
       <Html ref={htmlRef} style={{ opacity: 0, pointerEvents: 'none' }}>
         <div ref={anchorRef} className="photo-grid-anchor" aria-hidden="true" />
         <div
+          ref={panelRef}
           className="photo-grid-panel"
           style={{ '--photo-grid-anchor-top': `${anchorTop}px` }}
         >
@@ -129,6 +148,7 @@ export const PhotoGridPanel = memo(function PhotoGridPanel({
             focusRow={gridFocus.row}
             focusCol={gridFocus.col}
             cols={5}
+            onPhotoClick={handlePhotoClick}
           />
         </div>
       </Html>

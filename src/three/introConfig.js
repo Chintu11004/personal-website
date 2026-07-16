@@ -27,7 +27,7 @@ export const INTRO = {
 };
 
 export const BOOT_PANEL_CONTENT = {
-  text: 'Press Enter to Boot',
+  text: 'Press any Key to Boot',
 };
 
 export const INTRO_PANEL_CONTENT = {

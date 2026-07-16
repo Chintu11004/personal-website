@@ -1,4 +1,4 @@
-import { memo, Suspense, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import { memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { VerticalSubMenu } from './VerticalSubMenu';
@@ -9,6 +9,7 @@ import { SELECTION, useSelectionAnimation } from './hooks/useSelectionAnimation'
 import { lerp, lerpFactor } from './utils/animation';
 import { getIconIntroProgress, INTRO } from './introConfig';
 import { navItems } from './navItems';
+import { createMeshPointerProps } from './utils/pointerNav';
 
 const LAYOUT = {
   spacing: 0.33,
@@ -31,7 +32,7 @@ function iconBodyPropsAreEqual(prev, next) {
   );
 }
 
-const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, navDepthRef, fullscreenPanelVisibleRef, introCompleteRef, shaders }) {
+const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, navDepthRef, fullscreenPanelVisibleRef, introCompleteRef, shaders, onIconClick }) {
   const focusCol = focusColRef.current?.value ?? 0;
   const colOffset = index - focusCol;
   const isSelected = index === focusCol;
@@ -109,6 +110,16 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, na
     }
   }, -1);
 
+  const handleClick = useCallback((e) => {
+    e.stopPropagation();
+    onIconClick?.(index);
+  }, [index, onIconClick]);
+
+  const pointerProps = useMemo(
+    () => createMeshPointerProps(introCompleteRef),
+    [introCompleteRef]
+  );
+
   return (
     <group ref={contentRef}>
       <IconShaderMesh
@@ -118,6 +129,9 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, na
         position={[0, 0.045, 0]}
         meshRef={meshRef}
         materialRef={materialRef}
+        onClick={handleClick}
+        onPointerOver={pointerProps.onPointerOver}
+        onPointerOut={pointerProps.onPointerOut}
       />
       <IconLabel
         label={item.label}
@@ -129,7 +143,7 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, na
   );
 }, iconBodyPropsAreEqual);
 
-function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, fullscreenPanelVisibleRef, introCompleteRef, subMenusEnabled, shaders }) {
+function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, fullscreenPanelVisibleRef, introCompleteRef, subMenusEnabled, shaders, onIconClick, onSubItemClick }) {
   const groupRef = useRef();
   const isActive = index === focusCol;
   const isExiting = exitingCols.includes(index);
@@ -151,6 +165,7 @@ function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusCo
           fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
           introCompleteRef={introCompleteRef}
           shaders={shaders}
+          onIconClick={onIconClick}
         />
       </Suspense>
       {showSubMenu && (
@@ -165,6 +180,8 @@ function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusCo
           contentPanelVisibleRef={contentPanelVisibleRef}
           fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
           shaders={shaders}
+          onSubItemClick={onSubItemClick}
+          introCompleteRef={introCompleteRef}
         />
       )}
     </group>
@@ -182,6 +199,8 @@ export const NavIcons = memo(function NavIcons({
   fullscreenPanelVisibleRef,
   introCompleteRef,
   subMenusEnabled,
+  onIconClick,
+  onSubItemClick,
 }) {
   const shaders = useIconShaders();
 
@@ -205,6 +224,8 @@ export const NavIcons = memo(function NavIcons({
           focusCol={focusCol}
           exitingCols={exitingCols}
           removingExitingCols={removingExitingCols}
+          onIconClick={onIconClick}
+          onSubItemClick={onSubItemClick}
         />
       ))}
     </>

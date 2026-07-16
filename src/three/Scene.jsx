@@ -14,7 +14,7 @@ import { IntroLogo } from './IntroLogo';
 import { IntroPanel } from './IntroPanel';
 import { CAMERA } from './cameraConfig';
 
-export const Scene = memo( function Scene({ booted, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, fullscreenPanelVisibleRef, fullscreenOpenRef, photoGridPanelVisibleRef, focusCol, exitingCols, removingExitingCols, photoGridFocusRef, photoViewerOpenRef, introBackgroundOpacityRef, introRibbonOpacityRef, introUiOpacityRef, introCompleteRef, subMenuEnabledRef, onSubMenusEnabled, onIntroComplete, subMenusEnabled, introLogoMounted }) {
+export const Scene = memo( function Scene({ booted, onBoot, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, fullscreenPanelVisibleRef, fullscreenOpenRef, photoGridPanelVisibleRef, focusCol, exitingCols, removingExitingCols, photoGridFocusRef, photoViewerOpenRef, introBackgroundOpacityRef, introRibbonOpacityRef, introUiOpacityRef, introCompleteRef, subMenuEnabledRef, onSubMenusEnabled, onIntroComplete, subMenusEnabled, introLogoMounted, pointerNav }) {
   const size = useThree((state) => state.size);
   const camera = useThree((state) => state.camera);
   const invalidate = useThree((state) => state.invalidate);
@@ -47,7 +47,7 @@ export const Scene = memo( function Scene({ booted, focusColRef, focusSubRowRef,
         introRibbonOpacityRef={introRibbonOpacityRef}
       />
       {introLogoMounted && <IntroLogo />}
-      <IntroPanel booted={booted} />
+      <IntroPanel booted={booted} onBoot={onBoot} introCompleteRef={introCompleteRef} />
       <ContentPanelBackground
         focusColRef={focusColRef}
         focusSubRowRef={focusSubRowRef}
@@ -67,6 +67,7 @@ export const Scene = memo( function Scene({ booted, focusColRef, focusSubRowRef,
         photoGridFocusRef={photoGridFocusRef}
         photoGridPanelVisibleRef={photoGridPanelVisibleRef}
         photoViewerOpenRef={photoViewerOpenRef}
+        onPhotoClick={pointerNav?.onPhotoClick}
       />
       <PhotoViewerPanel
         focusColRef={focusColRef}
@@ -91,6 +92,8 @@ export const Scene = memo( function Scene({ booted, focusColRef, focusSubRowRef,
         fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
         introCompleteRef={introCompleteRef}
         subMenusEnabled={subMenusEnabled}
+        onIconClick={pointerNav?.onIconClick}
+        onSubItemClick={pointerNav?.onSubItemClick}
       />
       <IntroController
         booted={booted}

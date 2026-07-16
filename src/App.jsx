@@ -1,12 +1,13 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Scene } from './three/Scene';
 import XMBNav from './components/XMBNav';
 import Clock from './components/Clock';
 import './App.css';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { navItems } from './three/navItems';
 import { NAV_CANCEL_AUDIO, NAV_DECIDE_AUDIO, STARTUP_AUDIO, STARTUP_AUDIO_VOLUME } from './three/introConfig';
 import { preloadNavTextures } from './three/utils/preloadNavTextures';
+import { createPointerNavHandlers } from './three/utils/pointerNav';
 import { playUiSound, preloadUiSound, unlockUiAudio } from './utils/uiSound';
 
 const BOOT_SOUNDS = [STARTUP_AUDIO, NAV_DECIDE_AUDIO, NAV_CANCEL_AUDIO];
@@ -38,20 +39,24 @@ function App() {
   const enableSubMenus = useCallback(() => setSubMenusEnabled(true), []);
   const finishIntro = useCallback(() => setIntroLogoMounted(false), []);
 
+  const boot = useCallback(() => {
+    if (bootedRef.current) return;
+    bootedRef.current = true;
+    setBooted(true);
+    unlockUiAudio(BOOT_SOUNDS);
+    void playUiSound(STARTUP_AUDIO, STARTUP_AUDIO_VOLUME);
+  }, []);
+
   useEffect(() => {
     const onKeyDown = (e) => {
       if (bootedRef.current || e.key !== 'Enter') return;
-
       e.preventDefault();
-      bootedRef.current = true;
-      setBooted(true);
-      unlockUiAudio(BOOT_SOUNDS);
-      void playUiSound(STARTUP_AUDIO, STARTUP_AUDIO_VOLUME);
+      boot();
     };
 
     window.addEventListener('keydown', onKeyDown, true);
     return () => window.removeEventListener('keydown', onKeyDown, true);
-  }, []);
+  }, [boot]);
 
   const removingExitingCol = useCallback((colIndex) => {
     setExitingCols((prev) => prev.filter((c) => c !== colIndex));
@@ -74,6 +79,23 @@ function App() {
     setFocusCol(newCol);
   }, []);
 
+  const pointerNav = useMemo(
+    () =>
+      createPointerNavHandlers(
+        {
+          focusColRef,
+          focusSubRowRef,
+          navDepthRef,
+          photoGridFocusRef,
+          photoViewerOpenRef,
+          fullscreenOpenRef,
+          introCompleteRef,
+        },
+        { navigateToCol, subMenusEnabled }
+      ),
+    [navigateToCol, subMenusEnabled]
+  );
+
   return (
     <>
       <Canvas
@@ -91,6 +113,7 @@ function App() {
       >
         <Scene
           booted={booted}
+          onBoot={boot}
           focusColRef={focusColRef}
           focusSubRowRef={focusSubRowRef}
           navDepthRef={navDepthRef}
@@ -112,6 +135,7 @@ function App() {
           onIntroComplete={finishIntro}
           subMenusEnabled={subMenusEnabled}
           introLogoMounted={introLogoMounted}
+          pointerNav={pointerNav}
         />
       </Canvas>
       <XMBNav

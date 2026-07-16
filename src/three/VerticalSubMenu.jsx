@@ -1,4 +1,4 @@
-import { memo, Suspense, useEffect, useLayoutEffect, useRef } from 'react';
+import { memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { IconShaderMesh } from './IconShaderMesh';
@@ -6,6 +6,7 @@ import { ThumbnailIconMesh } from './ThumbnailIconMesh';
 import { IconLabel } from './IconLabel';
 import { SELECTION, useSelectionAnimation } from './hooks/useSelectionAnimation';
 import { lerp, lerpFactor } from './utils/animation';
+import { createMeshPointerProps } from './utils/pointerNav';
 
 const LAYOUT = {
   spacing: 0.24,
@@ -53,7 +54,8 @@ function subItemPropsAreEqual(prev, next) {
     prev.navDepthRef === next.navDepthRef &&
     prev.contentPanelVisibleRef === next.contentPanelVisibleRef &&
     prev.fullscreenPanelVisibleRef === next.fullscreenPanelVisibleRef &&
-    prev.shaders === next.shaders
+    prev.shaders === next.shaders &&
+    prev.pointerProps === next.pointerProps
   );
 }
 
@@ -68,6 +70,9 @@ const SubItem = memo(function SubItem({
   contentPanelVisibleRef,
   fullscreenPanelVisibleRef,
   shaders,
+  modeRef,
+  onSubItemClickRef,
+  pointerProps,
 }) {
   const isCustomThumbnail = item.thumbnail === 'custom';
   const activeShaders = isCustomThumbnail ? shaders.thumbnail : shaders.normal;
@@ -163,6 +168,12 @@ const SubItem = memo(function SubItem({
     });
   });
 
+  const handleClick = useCallback((e) => {
+    e.stopPropagation();
+    if (modeRef.current !== 'active') return;
+    onSubItemClickRef.current?.(colIndex, index);
+  }, [colIndex, index, modeRef, onSubItemClickRef]);
+
   return (
     <group ref={groupRef}>
       {isCustomThumbnail ? (
@@ -173,6 +184,9 @@ const SubItem = memo(function SubItem({
           meshRef={meshRef}
           materialRef={materialRef}
           initialOpacity={0}
+          onClick={handleClick}
+          onPointerOver={pointerProps.onPointerOver}
+          onPointerOut={pointerProps.onPointerOut}
         />
       ) : (
         <IconShaderMesh
@@ -182,6 +196,9 @@ const SubItem = memo(function SubItem({
           meshRef={meshRef}
           materialRef={materialRef}
           initialOpacity={0}
+          onClick={handleClick}
+          onPointerOver={pointerProps.onPointerOver}
+          onPointerOut={pointerProps.onPointerOut}
         />
       )}
       <group ref={labelGroupRef}>
@@ -215,13 +232,38 @@ export const VerticalSubMenu = memo(function VerticalSubMenu({
   contentPanelVisibleRef,
   fullscreenPanelVisibleRef,
   shaders,
+  onSubItemClick,
+  introCompleteRef,
 }) {
   const masterOpacity = useRef(mode === 'active' ? 0 : 1);
   const didComplete = useRef(false);
+  const modeRef = useRef(mode);
+  const onSubItemClickRef = useRef(onSubItemClick);
+  const pointerProps = useMemo(
+    () => createMeshPointerProps(introCompleteRef),
+    [introCompleteRef]
+  );
 
-  useFrame((_, delta) => {
+  modeRef.current = mode;
+  onSubItemClickRef.current = onSubItemClick;
+
+  useEffect(() => {
+    if (mode === 'active') {
+      didComplete.current = false;
+    }
+  }, [mode]);
+
+  useFrame((state, delta) => {
     const target = mode === 'active' ? 1 : 0;
+    const prevOpacity = masterOpacity.current;
     masterOpacity.current = lerp(masterOpacity.current, target, lerpFactor(delta));
+
+    if (
+      Math.abs(masterOpacity.current - target) > 0.001 ||
+      Math.abs(prevOpacity - masterOpacity.current) > 0.0001
+    ) {
+      state.invalidate();
+    }
 
     if (mode === 'exiting' && masterOpacity.current <= 0.01 && !didComplete.current) {
       didComplete.current = true;
@@ -246,6 +288,9 @@ export const VerticalSubMenu = memo(function VerticalSubMenu({
             contentPanelVisibleRef={contentPanelVisibleRef}
             fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
             shaders={shaders}
+            modeRef={modeRef}
+            onSubItemClickRef={onSubItemClickRef}
+            pointerProps={pointerProps}
           />
         </Suspense>
       ))}

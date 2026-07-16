@@ -14,6 +14,11 @@
   --panel-text-width: var(--panel-intro-text-width);
 }
 
+.intro-panel--boot {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
 .intro-panel__backdrop {
   position: absolute;
   inset: 0;

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { navItems } from '../three/navItems';
 import { NAV_CANCEL_AUDIO, NAV_DECIDE_AUDIO } from '../three/introConfig';
+import { performNavCancel } from '../three/utils/navCancel';
 import { playUiSound, preloadUiSound, unlockUiAudio } from '../utils/uiSound';
 import './XMBNav.css';
 
@@ -16,10 +17,6 @@ function playDecide() {
   playUiSound(NAV_DECIDE_AUDIO);
 }
 
-function playCancel() {
-  playUiSound(NAV_CANCEL_AUDIO);
-}
-
 function setPhotoIndex(index, photoGridFocusRef) {
   if (!photoGridFocusRef?.current) return;
   photoGridFocusRef.current.row = Math.floor(index / GRID_COLS);
@@ -28,6 +25,23 @@ function setPhotoIndex(index, photoGridFocusRef) {
 
 function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photoGridFocusRef, photoViewerOpenRef, fullscreenOpenRef, introCompleteRef, subMenusEnabled }) {
   useEffect(() => {
+    const cancelRefs = {
+      focusColRef,
+      focusSubRowRef,
+      navDepthRef,
+      photoViewerOpenRef,
+      fullscreenOpenRef,
+      introCompleteRef,
+    };
+
+    const cancel = () => performNavCancel(cancelRefs);
+
+    const handleContextMenu = (e) => {
+      if (!introCompleteRef?.current) return;
+      e.preventDefault();
+      cancel();
+    };
+
     const handleKeyDown = (e) => {
       if (!focusColRef.current) return;
       if (!introCompleteRef?.current) return;
@@ -39,8 +53,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
           case 'Escape':
           case 'Backspace':
             e.preventDefault();
-            fullscreenOpenRef.current = false;
-            playCancel();
+            cancel();
             break;
           default:
             break;
@@ -77,9 +90,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
             case 'Escape':
             case 'Backspace':
               e.preventDefault();
-              photoViewerOpenRef.current = false;
-              setDepth(0);
-              playCancel();
+              cancel();
               break;
             default:
               break;
@@ -112,8 +123,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
             case 'Escape':
             case 'Backspace':
               e.preventDefault();
-              photoViewerOpenRef.current = false;
-              playCancel();
+              cancel();
               break;
             default:
               break;
@@ -164,9 +174,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
           case 'Escape':
           case 'Backspace':
             e.preventDefault();
-            photoViewerOpenRef.current = false;
-            setDepth(0);
-            playCancel();
+            cancel();
             break;
           default:
             break;
@@ -273,8 +281,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
         case 'Backspace':
           if (depth > 0) {
             e.preventDefault();
-            setDepth(0);
-            playCancel();
+            cancel();
           }
           break;
         default:
@@ -283,7 +290,11 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('contextmenu', handleContextMenu, true);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('contextmenu', handleContextMenu, true);
+    };
   }, [focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photoGridFocusRef, photoViewerOpenRef, fullscreenOpenRef, introCompleteRef, subMenusEnabled]);
 
   return (

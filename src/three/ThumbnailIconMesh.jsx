@@ -10,11 +10,21 @@ export const ThumbnailIconMesh = memo(function ThumbnailIconMesh({
   materialRef,
   initialOpacity = 0.5,
   renderOrder = 2,
+  onClick,
+  onPointerOver,
+  onPointerOut,
 }) {
   const args = Array.isArray(size) ? size : [size, size];
 
   return (
-    <mesh ref={meshRef} position={position} renderOrder={renderOrder}>
+    <mesh
+      ref={meshRef}
+      position={position}
+      renderOrder={renderOrder}
+      onClick={onClick}
+      onPointerOver={onPointerOver}
+      onPointerOut={onPointerOut}
+    >
       <planeGeometry args={args} />
       <shaderMaterial
         ref={materialRef}

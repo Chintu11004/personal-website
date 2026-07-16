@@ -12,7 +12,7 @@ function getTranslateY(rowHeights, focusRow) {
   return -offset;
 }
 
-export const PhotoGrid = memo(function PhotoGrid({ photos, focusRow, focusCol, cols = 5 }) {
+export const PhotoGrid = memo(function PhotoGrid({ photos, focusRow, focusCol, cols = 5, onPhotoClick }) {
   const viewportRef = useRef(null);
   const itemRefs = useRef([]);
   const [rowHeights, setRowHeights] = useState([]);
@@ -77,6 +77,9 @@ export const PhotoGrid = memo(function PhotoGrid({ photos, focusRow, focusCol, c
                   itemRefs.current[index] = node;
                 }}
                 className={`photo-grid__item ${isFocused ? 'photo-grid__item--focused' : ''}`}
+                onClick={onPhotoClick ? () => onPhotoClick(index) : undefined}
+                role={onPhotoClick ? 'button' : undefined}
+                tabIndex={onPhotoClick ? -1 : undefined}
               >
                 <div className="photo-grid__image">
                   <img src={photo.src} alt={photo.title || ''} loading="lazy" />
