@@ -9,7 +9,7 @@ varying vec3 v_worldNormal;
 varying vec2 v_uv;
 
 void main() {
-    vec4 normData = texture2D(u_normData, vec2(v_uv.x, 1.0 - v_uv.y));
+    vec4 normData = texture2D(u_normData, vec2(v_uv.x, v_uv.y));
 
     // vec2 normalXY = normData.rg * 2.0 - 1.0;
     // float normalZ = sqrt(max(0.0, 1.0 - dot(normalXY, normalXY)));
