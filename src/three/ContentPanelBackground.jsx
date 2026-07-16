@@ -1,7 +1,7 @@
 import { memo, Suspense, useEffect, useRef, useState } from 'react';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { getFocusedSubItem, getSelectionFingerprint } from './utils/selection';
+import { getFocusedSubItem } from './utils/selection';
 import { BackgroundImageMesh } from './BackgroundImageMesh';
 import { getOrthoViewportSize } from './cameraConfig';
 import { useBackgroundShader } from './hooks/useBackgroundShader';
@@ -53,19 +53,32 @@ export const ContentPanelBackground = memo(function ContentPanelBackground({
   focusColRef,
   focusSubRowRef,
   contentPanelVisibleRef,
+  contentPanelOpenRef,
   introCompleteRef,
 }) {
   const shaders = useBackgroundShader();
-  const lastFingerprint = useRef('');
+  const bgUrlRef = useRef(null);
   const [bgUrl, setBgUrl] = useState(null);
 
   useFrame(() => {
     if (!introCompleteRef?.current) return;
 
-    const fingerprint = getSelectionFingerprint(focusColRef, focusSubRowRef);
-    if (fingerprint !== lastFingerprint.current) {
-      lastFingerprint.current = fingerprint;
-      setBgUrl(getFocusedSubItem(focusColRef, focusSubRowRef)?.content?.background ?? null);
+    const panelOpen = contentPanelOpenRef?.current?.value ?? false;
+    const panelOpacity = contentPanelVisibleRef?.current?.value ?? 0;
+
+    if (panelOpen) {
+      const nextBg =
+        getFocusedSubItem(focusColRef, focusSubRowRef)?.content?.background ?? null;
+      if (nextBg !== bgUrlRef.current) {
+        bgUrlRef.current = nextBg;
+        setBgUrl(nextBg);
+      }
+      return;
+    }
+
+    if (panelOpacity <= 0.01 && bgUrlRef.current !== null) {
+      bgUrlRef.current = null;
+      setBgUrl(null);
     }
   });
 

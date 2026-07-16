@@ -53,6 +53,7 @@ export const Scene = memo( function Scene({ booted, onBoot, focusColRef, focusSu
         focusColRef={focusColRef}
         focusSubRowRef={focusSubRowRef}
         contentPanelVisibleRef={contentPanelVisibleRef}
+        contentPanelOpenRef={contentPanelOpenRef}
         introCompleteRef={introCompleteRef}
       />
       <ContentPanel

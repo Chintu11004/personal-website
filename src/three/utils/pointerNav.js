@@ -1,4 +1,5 @@
 import { navItems } from '../navItems';
+import { openLauncherHref } from './openLauncherHref';
 import { NAV_DECIDE_AUDIO } from '../introConfig';
 import { playUiSound, unlockUiAudio } from '../../utils/uiSound';
 
@@ -59,7 +60,7 @@ export function createPointerNavHandlers(refs, { navigateToCol, subMenusEnabled 
       return;
     }
     if (subItem.type === 'launcher' && subItem.href) {
-      window.open(subItem.href, '_blank', 'noopener,noreferrer');
+      openLauncherHref(subItem.href);
       return;
     }
     if (subItem.type === 'describe') {

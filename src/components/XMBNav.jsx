@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { navItems } from '../three/navItems';
+import { openLauncherHref } from '../three/utils/openLauncherHref';
 import { NAV_CANCEL_AUDIO, NAV_DECIDE_AUDIO } from '../three/introConfig';
 import { performNavCancel } from '../three/utils/navCancel';
 import { playUiSound, preloadUiSound, unlockUiAudio } from '../utils/uiSound';
@@ -256,7 +257,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
               break;
             }
             if (subItem?.type === 'launcher' && subItem?.href) {
-              window.open(subItem.href, '_blank', 'noopener,noreferrer');
+              openLauncherHref(subItem.href);
               break;
             }
             if (subItem?.type === 'describe') {

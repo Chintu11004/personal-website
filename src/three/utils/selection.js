@@ -20,7 +20,8 @@ export function isLauncherIdleCandidate(focusColRef, focusSubRowRef) {
   const col = focusColRef?.current?.value ?? 0;
   const items = navItems[col]?.items;
   if (!items?.length) return false;
-  return getFocusedSubItem(focusColRef, focusSubRowRef)?.type === 'launcher';
+  const subItem = getFocusedSubItem(focusColRef, focusSubRowRef);
+  return subItem?.type === 'launcher' && subItem?.content;
 }
 
 export function getSubItemPhotos(item) {

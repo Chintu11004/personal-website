@@ -59,7 +59,7 @@ function ProfileTrigger({
       onClick={handleClick}
       aria-label="Click here for help in navigation"
     >
-      <img src="/icons/01.png" alt="" />
+      <img src="/icons/31.png" alt="" />
       <span className="profile-trigger__label">Click here for help in navigation</span>
     </button>
   );

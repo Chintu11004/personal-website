@@ -11,10 +11,20 @@ function LauncherMusic({
 }) {
   useEffect(() => {
     let frameId = 0;
+    let tabVisible = document.visibilityState === 'visible';
+
+    const onVisibilityChange = () => {
+      tabVisible = document.visibilityState === 'visible';
+      if (!tabVisible) {
+        stopLauncherMusic();
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     const tick = () => {
-      if (!introCompleteRef?.current) {
-        stopLauncherMusic();
+      if (!introCompleteRef?.current || !tabVisible) {
+        if (!tabVisible) stopLauncherMusic();
       } else {
         const panelOpen = contentPanelOpenRef?.current?.value ?? false;
         const panelOpacity = contentPanelVisibleRef?.current?.value ?? 0;
@@ -34,6 +44,7 @@ function LauncherMusic({
 
     frameId = requestAnimationFrame(tick);
     return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       cancelAnimationFrame(frameId);
       stopLauncherMusic();
     };

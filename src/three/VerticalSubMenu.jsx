@@ -28,6 +28,14 @@ const SUB_SELECTION = {
 };
 
 const DEFAULT_SUB_ICON = '/icons/dif.png';
+const FOLDER_ICON = '/icons/63.png';
+
+function getSubItemTextureUrl(item) {
+  if (item.image) return item.image;
+  if (item.src) return item.src;
+  if (item.type === 'folder') return FOLDER_ICON;
+  return DEFAULT_SUB_ICON;
+}
 
 function getRowY(rowOffset) {
   if (rowOffset >= 0) {
@@ -107,7 +115,7 @@ const SubItem = memo(function SubItem({
     initialLabelOpacity,
   });
 
-  const texture = useLoader(THREE.TextureLoader, item.image ?? item.src ?? DEFAULT_SUB_ICON);
+  const texture = useLoader(THREE.TextureLoader, getSubItemTextureUrl(item));
 
   useEffect(() => {
     texture.colorSpace = THREE.LinearSRGBColorSpace;

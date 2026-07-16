@@ -10,6 +10,7 @@ export function collectNavTextureUrls(items) {
 
   items.forEach(visit);
   urls.add('/icons/dif.png');
+  urls.add('/icons/63.png');
 
   return [...urls];
 }
