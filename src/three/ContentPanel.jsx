@@ -20,6 +20,7 @@ export const ContentPanel = memo(function ContentPanel({
   focusSubRowRef,
   contentPanelVisibleRef,
   introCompleteRef,
+  profilePanelOpenRef,
 }) {
   const groupRef = useRef();
   const htmlRef = useRef();
@@ -41,6 +42,8 @@ export const ContentPanel = memo(function ContentPanel({
     }
 
     if (!introCompleteRef?.current) {
+      idleTime.current = 0;
+    } else if (profilePanelOpenRef?.current) {
       idleTime.current = 0;
     } else if (isLauncherIdleCandidate(focusColRef, focusSubRowRef)) {
       idleTime.current = Math.min(idleTime.current + delta, IDLE_DELAY);

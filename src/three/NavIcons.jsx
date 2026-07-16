@@ -26,13 +26,14 @@ function iconBodyPropsAreEqual(prev, next) {
     prev.focusColRef === next.focusColRef &&
     prev.navDepthRef === next.navDepthRef &&
     prev.fullscreenPanelVisibleRef === next.fullscreenPanelVisibleRef &&
+    prev.profilePanelVisibleRef === next.profilePanelVisibleRef &&
     prev.introCompleteRef === next.introCompleteRef &&
     prev.subMenusEnabled === next.subMenusEnabled &&
     prev.shaders === next.shaders
   );
 }
 
-const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, navDepthRef, fullscreenPanelVisibleRef, introCompleteRef, shaders, onIconClick }) {
+const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, navDepthRef, fullscreenPanelVisibleRef, profilePanelVisibleRef, introCompleteRef, shaders, onIconClick }) {
   const focusCol = focusColRef.current?.value ?? 0;
   const colOffset = index - focusCol;
   const isSelected = index === focusCol;
@@ -81,7 +82,10 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, na
     const isSelected = index === focusCol;
     const colOffset = index - focusCol;
     const depth = navDepthRef?.current?.value ?? 0;
-    const hide = 1 - (fullscreenPanelVisibleRef?.current?.value ?? 0);
+    const hide = 1 - Math.max(
+      fullscreenPanelVisibleRef?.current?.value ?? 0,
+      profilePanelVisibleRef?.current?.value ?? 0,
+    );
     const t = lerpFactor(delta);
     const { opacity: introOpacity, scale: introScale } = introCompleteRef?.current
       ? { opacity: 1, scale: 1 }
@@ -143,7 +147,7 @@ const IconBody = memo(function IconBody({ index, item, groupRef, focusColRef, na
   );
 }, iconBodyPropsAreEqual);
 
-function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, fullscreenPanelVisibleRef, introCompleteRef, subMenusEnabled, shaders, onIconClick, onSubItemClick }) {
+function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, fullscreenPanelVisibleRef, profilePanelVisibleRef, introCompleteRef, subMenusEnabled, shaders, onIconClick, onSubItemClick }) {
   const groupRef = useRef();
   const isActive = index === focusCol;
   const isExiting = exitingCols.includes(index);
@@ -163,6 +167,7 @@ function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusCo
           focusColRef={focusColRef}
           navDepthRef={navDepthRef}
           fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
+          profilePanelVisibleRef={profilePanelVisibleRef}
           introCompleteRef={introCompleteRef}
           shaders={shaders}
           onIconClick={onIconClick}
@@ -179,6 +184,7 @@ function Icon({ index, item, focusCol, exitingCols, removingExitingCols, focusCo
           navDepthRef={navDepthRef}
           contentPanelVisibleRef={contentPanelVisibleRef}
           fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
+          profilePanelVisibleRef={profilePanelVisibleRef}
           shaders={shaders}
           onSubItemClick={onSubItemClick}
           introCompleteRef={introCompleteRef}
@@ -197,6 +203,7 @@ export const NavIcons = memo(function NavIcons({
   navDepthRef,
   contentPanelVisibleRef,
   fullscreenPanelVisibleRef,
+  profilePanelVisibleRef,
   introCompleteRef,
   subMenusEnabled,
   onIconClick,
@@ -218,6 +225,7 @@ export const NavIcons = memo(function NavIcons({
           navDepthRef={navDepthRef}
           contentPanelVisibleRef={contentPanelVisibleRef}
           fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
+          profilePanelVisibleRef={profilePanelVisibleRef}
           introCompleteRef={introCompleteRef}
           subMenusEnabled={subMenusEnabled}
           shaders={shaders}

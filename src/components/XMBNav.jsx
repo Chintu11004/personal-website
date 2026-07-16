@@ -23,7 +23,7 @@ function setPhotoIndex(index, photoGridFocusRef) {
   photoGridFocusRef.current.col = index % GRID_COLS;
 }
 
-function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photoGridFocusRef, photoViewerOpenRef, fullscreenOpenRef, introCompleteRef, subMenusEnabled }) {
+function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photoGridFocusRef, photoViewerOpenRef, fullscreenOpenRef, profilePanelOpenRef, introCompleteRef, subMenusEnabled }) {
   useEffect(() => {
     const cancelRefs = {
       focusColRef,
@@ -31,6 +31,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
       navDepthRef,
       photoViewerOpenRef,
       fullscreenOpenRef,
+      profilePanelOpenRef,
       introCompleteRef,
     };
 
@@ -48,7 +49,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
 
       unlockUiAudio(NAV_SOUNDS);
 
-      if (fullscreenOpenRef?.current) {
+      if (fullscreenOpenRef?.current || profilePanelOpenRef?.current) {
         switch (e.key) {
           case 'Escape':
           case 'Backspace':
@@ -74,6 +75,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
         if (val === 0) {
           if (photoViewerOpenRef) photoViewerOpenRef.current = false;
           if (fullscreenOpenRef) fullscreenOpenRef.current = false;
+          if (profilePanelOpenRef) profilePanelOpenRef.current = false;
         }
       };
 
@@ -295,7 +297,7 @@ function XMBNav({ focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photo
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('contextmenu', handleContextMenu, true);
     };
-  }, [focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photoGridFocusRef, photoViewerOpenRef, fullscreenOpenRef, introCompleteRef, subMenusEnabled]);
+  }, [focusColRef, focusSubRowRef, navDepthRef, navigateToCol, photoGridFocusRef, photoViewerOpenRef, fullscreenOpenRef, profilePanelOpenRef, introCompleteRef, subMenusEnabled]);
 
   return (
     <nav className="xmb-nav" aria-label="Main navigation">

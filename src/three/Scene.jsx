@@ -8,13 +8,14 @@ import { PhotoGridPanel } from './PhotoGridPanel';
 import { PhotoViewerPanel } from './PhotoViewerPanel';
 import { ContentPanelBackground } from './ContentPanelBackground';
 import { FullscreenPanel } from './FullscreenPanel';
+import { ProfilePanel } from './ProfilePanel';
 import { NavIcons } from './NavIcons';
 import { IntroController } from './IntroController';
 import { IntroLogo } from './IntroLogo';
 import { IntroPanel } from './IntroPanel';
 import { CAMERA } from './cameraConfig';
 
-export const Scene = memo( function Scene({ booted, onBoot, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, fullscreenPanelVisibleRef, fullscreenOpenRef, photoGridPanelVisibleRef, focusCol, exitingCols, removingExitingCols, photoGridFocusRef, photoViewerOpenRef, introBackgroundOpacityRef, introRibbonOpacityRef, introUiOpacityRef, introCompleteRef, subMenuEnabledRef, onSubMenusEnabled, onIntroComplete, subMenusEnabled, introLogoMounted, pointerNav }) {
+export const Scene = memo( function Scene({ booted, onBoot, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, fullscreenPanelVisibleRef, profilePanelVisibleRef, fullscreenOpenRef, profilePanelOpenRef, photoGridPanelVisibleRef, focusCol, exitingCols, removingExitingCols, photoGridFocusRef, photoViewerOpenRef, introBackgroundOpacityRef, introRibbonOpacityRef, introUiOpacityRef, introCompleteRef, subMenuEnabledRef, onSubMenusEnabled, onIntroComplete, subMenusEnabled, introLogoMounted, pointerNav }) {
   const size = useThree((state) => state.size);
   const camera = useThree((state) => state.camera);
   const invalidate = useThree((state) => state.invalidate);
@@ -59,6 +60,7 @@ export const Scene = memo( function Scene({ booted, onBoot, focusColRef, focusSu
         focusSubRowRef={focusSubRowRef}
         contentPanelVisibleRef={contentPanelVisibleRef}
         introCompleteRef={introCompleteRef}
+        profilePanelOpenRef={profilePanelOpenRef}
       />
       <PhotoGridPanel
         focusColRef={focusColRef}
@@ -81,6 +83,10 @@ export const Scene = memo( function Scene({ booted, onBoot, focusColRef, focusSu
         fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
         fullscreenOpenRef={fullscreenOpenRef}
       />
+      <ProfilePanel
+        profilePanelOpenRef={profilePanelOpenRef}
+        profilePanelVisibleRef={profilePanelVisibleRef}
+      />
       <NavIcons
         focusCol={focusCol}
         exitingCols={exitingCols}
@@ -90,6 +96,7 @@ export const Scene = memo( function Scene({ booted, onBoot, focusColRef, focusSu
         navDepthRef={navDepthRef}
         contentPanelVisibleRef={contentPanelVisibleRef}
         fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
+        profilePanelVisibleRef={profilePanelVisibleRef}
         introCompleteRef={introCompleteRef}
         subMenusEnabled={subMenusEnabled}
         onIconClick={pointerNav?.onIconClick}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './Clock.css';
 
-function Clock({ contentPanelVisibleRef, photoViewerOpenRef, fullscreenOpenRef, introUiOpacityRef }) {
+function Clock({ contentPanelVisibleRef, photoViewerOpenRef, fullscreenPanelVisibleRef, profilePanelVisibleRef, introUiOpacityRef }) {
   const [time, setTime] = useState(new Date());
   const [opacity, setOpacity] = useState(0);
 
@@ -18,17 +18,20 @@ function Clock({ contentPanelVisibleRef, photoViewerOpenRef, fullscreenOpenRef, 
 
     const updateOpacity = () => {
       const panelVisible = contentPanelVisibleRef?.current?.value ?? 0;
-      const fullscreenOpen = fullscreenOpenRef?.current ?? false;
+      const fullscreenVisible = fullscreenPanelVisibleRef?.current?.value ?? 0;
+      const profileVisible = profilePanelVisibleRef?.current?.value ?? 0;
+      const overlayVisible = Math.max(fullscreenVisible, profileVisible);
       const viewerOpen = photoViewerOpenRef?.current ?? false;
       const introUi = introUiOpacityRef?.current?.value ?? 1;
-      setOpacity((viewerOpen || fullscreenOpen ? 0 : 1 - panelVisible) * introUi);
+      const baseOpacity = viewerOpen ? 0 : (1 - panelVisible) * (1 - overlayVisible);
+      setOpacity(baseOpacity * introUi);
       frameId = requestAnimationFrame(updateOpacity);
     };
 
     updateOpacity();
 
     return () => cancelAnimationFrame(frameId);
-  }, [contentPanelVisibleRef, photoViewerOpenRef, fullscreenOpenRef, introUiOpacityRef]);
+  }, [contentPanelVisibleRef, photoViewerOpenRef, fullscreenPanelVisibleRef, profilePanelVisibleRef, introUiOpacityRef]);
 
   const formatTime = (date) => {
     const hours = date.getHours();

@@ -54,6 +54,7 @@ function subItemPropsAreEqual(prev, next) {
     prev.navDepthRef === next.navDepthRef &&
     prev.contentPanelVisibleRef === next.contentPanelVisibleRef &&
     prev.fullscreenPanelVisibleRef === next.fullscreenPanelVisibleRef &&
+    prev.profilePanelVisibleRef === next.profilePanelVisibleRef &&
     prev.shaders === next.shaders &&
     prev.pointerProps === next.pointerProps
   );
@@ -69,6 +70,7 @@ const SubItem = memo(function SubItem({
   navDepthRef,
   contentPanelVisibleRef,
   fullscreenPanelVisibleRef,
+  profilePanelVisibleRef,
   shaders,
   modeRef,
   onSubItemClickRef,
@@ -129,7 +131,8 @@ const SubItem = memo(function SubItem({
     const entered = isFocusCol && depth > 0;
     const panelVisible = contentPanelVisibleRef?.current?.value ?? 0;
     const fullscreenVisible = fullscreenPanelVisibleRef?.current?.value ?? 0;
-    const overlayOpacity = Math.max(panelVisible, fullscreenVisible);
+    const profileVisible = profilePanelVisibleRef?.current?.value ?? 0;
+    const overlayOpacity = Math.max(panelVisible, fullscreenVisible, profileVisible);
 
     let targetLabelOpacity = isSelected
       ? SUB_SELECTION.labelSelectedOpacity
@@ -154,8 +157,9 @@ const SubItem = memo(function SubItem({
         ? SELECTION.depthUnselectedOpacity + 0.25
         : SELECTION.unselectedOpacity;
 
-    if (fullscreenVisible > 0) {
-      targetShaderOpacity *= 1 - fullscreenVisible;
+    const panelOverlay = Math.max(fullscreenVisible, profileVisible);
+    if (panelOverlay > 0) {
+      targetShaderOpacity *= 1 - panelOverlay;
     }
 
     step(delta, state.camera.position, {
@@ -231,6 +235,7 @@ export const VerticalSubMenu = memo(function VerticalSubMenu({
   navDepthRef,
   contentPanelVisibleRef,
   fullscreenPanelVisibleRef,
+  profilePanelVisibleRef,
   shaders,
   onSubItemClick,
   introCompleteRef,
@@ -287,6 +292,7 @@ export const VerticalSubMenu = memo(function VerticalSubMenu({
             navDepthRef={navDepthRef}
             contentPanelVisibleRef={contentPanelVisibleRef}
             fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
+            profilePanelVisibleRef={profilePanelVisibleRef}
             shaders={shaders}
             modeRef={modeRef}
             onSubItemClickRef={onSubItemClickRef}

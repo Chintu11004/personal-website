@@ -1,0 +1,156 @@
+.profile-panel {
+  --panel-inset-y: 10vh;
+  --panel-inline-padding: 48px;
+  --panel-scrollbar-width: 6px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.profile-panel__backdrop {
+  position: absolute;
+  top: var(--panel-inset-y);
+  bottom: var(--panel-inset-y);
+  left: 0;
+  right: 0;
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  will-change: backdrop-filter;
+}
+
+.profile-panel__content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.profile-panel__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: rgba(255, 255, 255, 0.4);
+  z-index: 1;
+}
+
+.profile-panel__line--top {
+  top: var(--panel-inset-y);
+}
+
+.profile-panel__line--bottom {
+  bottom: var(--panel-inset-y);
+}
+
+.profile-panel__body-wrap {
+  position: absolute;
+  top: var(--panel-inset-y);
+  bottom: var(--panel-inset-y);
+  left: 0;
+  right: 0;
+  overflow: hidden;
+}
+
+.profile-panel__body {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 2rem var(--panel-inline-padding);
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.profile-panel__body::-webkit-scrollbar {
+  width: var(--panel-scrollbar-width);
+}
+
+.profile-panel__body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.profile-panel__body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.profile-panel__body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.profile-panel__section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 42rem;
+}
+
+.profile-panel__title {
+  font-family: var(--font-sans);
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow:
+    0 0 6px rgba(255, 255, 255, 0.45),
+    0 0 12px rgba(255, 255, 255, 0.25);
+}
+
+.profile-panel__image {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.profile-panel__scroll-hint {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.profile-panel__scroll-hint--visible {
+  opacity: 1;
+}
+
+.profile-panel__scroll-hint-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile-panel__scroll-hint-gradient {
+  width: 1px;
+  height: 2rem;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.6)
+  );
+}
+
+.profile-panel__scroll-hint-arrow {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid rgba(255, 255, 255, 0.6);
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
+}

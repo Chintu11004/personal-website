@@ -9,7 +9,11 @@ export function getSelectionFingerprint(focusColRef, focusSubRowRef) {
 export function getFocusedSubItem(focusColRef, focusSubRowRef) {
   const col = focusColRef?.current?.value ?? 0;
   const subRow = focusSubRowRef?.current?.values?.[col] ?? 0;
-  return navItems[col]?.items?.[subRow] ?? null;
+  const item = navItems[col];
+  const subItem = item?.items?.[subRow];
+  if (subItem) return subItem;
+  if (item?.type === 'describe' && item?.content) return item;
+  return null;
 }
 
 export function isLauncherIdleCandidate(focusColRef, focusSubRowRef) {

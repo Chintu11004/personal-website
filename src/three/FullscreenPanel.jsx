@@ -66,7 +66,7 @@ export const FullscreenPanel = memo(function FullscreenPanel({
     };
   }, [subItem]);
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     const fingerprint = getSelectionFingerprint(focusColRef, focusSubRowRef);
     if (fingerprint !== lastFingerprint.current) {
       lastFingerprint.current = fingerprint;
@@ -79,11 +79,21 @@ export const FullscreenPanel = memo(function FullscreenPanel({
 
     const shouldShow = fullscreenOpenRef?.current ?? false;
     const t = lerpFactor(delta);
+    const prevOpacity = opacity.current;
 
     opacity.current = lerp(opacity.current, shouldShow ? 1 : 0, t);
 
+    if (
+      shouldShow ||
+      opacity.current > 0.001 ||
+      Math.abs(prevOpacity - opacity.current) > 0.0001
+    ) {
+      state.invalidate();
+    }
+
     if (!shouldShow && opacity.current < 0.01) {
       opacity.current = 0;
+      lastFingerprint.current = '';
     }
 
     if (fullscreenPanelVisibleRef?.current) {

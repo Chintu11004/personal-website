@@ -10,12 +10,19 @@ export function performNavCancel({
   navDepthRef,
   photoViewerOpenRef,
   fullscreenOpenRef,
+  profilePanelOpenRef,
   introCompleteRef,
 }) {
   if (!focusColRef?.current) return false;
   if (!introCompleteRef?.current) return false;
 
   unlockUiAudio(NAV_SOUNDS);
+
+  if (profilePanelOpenRef?.current) {
+    profilePanelOpenRef.current = false;
+    playUiSound(NAV_CANCEL_AUDIO);
+    return true;
+  }
 
   if (fullscreenOpenRef?.current) {
     fullscreenOpenRef.current = false;
@@ -33,6 +40,7 @@ export function performNavCancel({
     if (val === 0) {
       if (photoViewerOpenRef) photoViewerOpenRef.current = false;
       if (fullscreenOpenRef) fullscreenOpenRef.current = false;
+      if (profilePanelOpenRef) profilePanelOpenRef.current = false;
     }
   };
 

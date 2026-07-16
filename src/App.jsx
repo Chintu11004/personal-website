@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { Scene } from './three/Scene';
 import XMBNav from './components/XMBNav';
 import Clock from './components/Clock';
+import ProfileTrigger from './components/ProfileTrigger';
 import './App.css';
 import { navItems } from './three/navItems';
 import { NAV_CANCEL_AUDIO, NAV_DECIDE_AUDIO, STARTUP_AUDIO, STARTUP_AUDIO_VOLUME } from './three/introConfig';
@@ -23,7 +24,9 @@ function App() {
   const navDepthRef = useRef({ value: 0 });
   const contentPanelVisibleRef = useRef({ value: 0 });
   const fullscreenPanelVisibleRef = useRef({ value: 0 });
+  const profilePanelVisibleRef = useRef({ value: 0 });
   const fullscreenOpenRef = useRef(false);
+  const profilePanelOpenRef = useRef(false);
   const photoGridPanelVisibleRef = useRef({ value: 0 });
   const photoGridFocusRef = useRef({ row: 0, col: 0 });
   const photoViewerOpenRef = useRef(false);
@@ -75,6 +78,7 @@ function App() {
     navDepthRef.current.value = 0;
     photoViewerOpenRef.current = false;
     fullscreenOpenRef.current = false;
+    profilePanelOpenRef.current = false;
     focusColRef.current.value = newCol;
     setFocusCol(newCol);
   }, []);
@@ -119,7 +123,9 @@ function App() {
           navDepthRef={navDepthRef}
           contentPanelVisibleRef={contentPanelVisibleRef}
           fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
+          profilePanelVisibleRef={profilePanelVisibleRef}
           fullscreenOpenRef={fullscreenOpenRef}
+          profilePanelOpenRef={profilePanelOpenRef}
           photoGridPanelVisibleRef={photoGridPanelVisibleRef}
           focusCol={focusCol}
           exitingCols={exitingCols}
@@ -146,14 +152,25 @@ function App() {
         photoGridFocusRef={photoGridFocusRef}
         photoViewerOpenRef={photoViewerOpenRef}
         fullscreenOpenRef={fullscreenOpenRef}
+        profilePanelOpenRef={profilePanelOpenRef}
         introCompleteRef={introCompleteRef}
         subMenusEnabled={subMenusEnabled}
       />
       <Clock
         contentPanelVisibleRef={contentPanelVisibleRef}
         photoViewerOpenRef={photoViewerOpenRef}
-        fullscreenOpenRef={fullscreenOpenRef}
+        fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
+        profilePanelVisibleRef={profilePanelVisibleRef}
         introUiOpacityRef={introUiOpacityRef}
+      />
+      <ProfileTrigger
+        contentPanelVisibleRef={contentPanelVisibleRef}
+        fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
+        profilePanelVisibleRef={profilePanelVisibleRef}
+        photoViewerOpenRef={photoViewerOpenRef}
+        introUiOpacityRef={introUiOpacityRef}
+        introCompleteRef={introCompleteRef}
+        profilePanelOpenRef={profilePanelOpenRef}
       />
     </>
   );
