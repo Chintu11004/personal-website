@@ -15,7 +15,7 @@ import { IntroLogo } from './IntroLogo';
 import { IntroPanel } from './IntroPanel';
 import { CAMERA } from './cameraConfig';
 
-export const Scene = memo( function Scene({ booted, onBoot, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, fullscreenPanelVisibleRef, profilePanelVisibleRef, fullscreenOpenRef, profilePanelOpenRef, photoGridPanelVisibleRef, focusCol, exitingCols, removingExitingCols, photoGridFocusRef, photoViewerOpenRef, introBackgroundOpacityRef, introRibbonOpacityRef, introUiOpacityRef, introCompleteRef, subMenuEnabledRef, onSubMenusEnabled, onIntroComplete, subMenusEnabled, introLogoMounted, pointerNav }) {
+export const Scene = memo( function Scene({ booted, onBoot, focusColRef, focusSubRowRef, navDepthRef, contentPanelVisibleRef, contentPanelOpenRef, fullscreenPanelVisibleRef, profilePanelVisibleRef, fullscreenOpenRef, profilePanelOpenRef, photoGridPanelVisibleRef, focusCol, exitingCols, removingExitingCols, photoGridFocusRef, photoViewerOpenRef, introBackgroundOpacityRef, introRibbonOpacityRef, introUiOpacityRef, introCompleteRef, subMenuEnabledRef, onSubMenusEnabled, onIntroComplete, subMenusEnabled, introLogoMounted, pointerNav }) {
   const size = useThree((state) => state.size);
   const camera = useThree((state) => state.camera);
   const invalidate = useThree((state) => state.invalidate);
@@ -59,6 +59,7 @@ export const Scene = memo( function Scene({ booted, onBoot, focusColRef, focusSu
         focusColRef={focusColRef}
         focusSubRowRef={focusSubRowRef}
         contentPanelVisibleRef={contentPanelVisibleRef}
+        contentPanelOpenRef={contentPanelOpenRef}
         introCompleteRef={introCompleteRef}
         profilePanelOpenRef={profilePanelOpenRef}
       />

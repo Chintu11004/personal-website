@@ -92,6 +92,7 @@ export const navItems = [
           description:
             'Oh no! CLU is going to kill the ISOs. I must parkour and wall-jump my way up the network tower and stop CLU.\n\nI fight for the Users.\n\n--------------------------\n\nCredits for music:\n\nGeneric Future Hero\'s theme by marcriver29: https://freesound.org/people/marcriver29/sounds/645691/\n\nTron World by RokZRooM: https://freesound.org/people/RokZRooM/sounds/444082/',
           background: '/images/tron_game/bg.png',
+          music: '/images/tron_game/xmb_music.m4a',
         },
       },
       {

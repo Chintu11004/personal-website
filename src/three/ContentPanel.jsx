@@ -19,6 +19,7 @@ export const ContentPanel = memo(function ContentPanel({
   focusColRef,
   focusSubRowRef,
   contentPanelVisibleRef,
+  contentPanelOpenRef,
   introCompleteRef,
   profilePanelOpenRef,
 }) {
@@ -72,6 +73,10 @@ export const ContentPanel = memo(function ContentPanel({
 
     if (contentPanelVisibleRef?.current) {
       contentPanelVisibleRef.current.value = opacity.current;
+    }
+
+    if (contentPanelOpenRef?.current) {
+      contentPanelOpenRef.current.value = shouldShow;
     }
 
     if (htmlRef.current) htmlRef.current.style.opacity = String(opacity.current);

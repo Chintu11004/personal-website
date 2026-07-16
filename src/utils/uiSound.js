@@ -2,21 +2,21 @@ let audioContext = null;
 const buffers = new Map();
 const loading = new Map();
 
-function getContext() {
+export function getAudioContext() {
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
   }
   return audioContext;
 }
 
-async function loadBuffer(src) {
+export async function loadAudioBuffer(src) {
   if (buffers.has(src)) return buffers.get(src);
   if (loading.has(src)) return loading.get(src);
 
   const promise = (async () => {
     const response = await fetch(src);
     const arrayBuffer = await response.arrayBuffer();
-    const buffer = await getContext().decodeAudioData(arrayBuffer);
+    const buffer = await getAudioContext().decodeAudioData(arrayBuffer);
     buffers.set(src, buffer);
     loading.delete(src);
     return buffer;
@@ -27,12 +27,12 @@ async function loadBuffer(src) {
 }
 
 export function preloadUiSound(src) {
-  void loadBuffer(src).catch(() => {});
+  void loadAudioBuffer(src).catch(() => {});
 }
 
 /** Call once from a user gesture (keydown/click) to satisfy autoplay policy. */
 export function unlockUiAudio(sources) {
-  const ctx = getContext();
+  const ctx = getAudioContext();
   if (ctx.state === 'suspended') {
     void ctx.resume().catch(() => {});
   }
@@ -42,12 +42,12 @@ export function unlockUiAudio(sources) {
 }
 
 export async function playUiSound(src, volume = 1) {
-  const ctx = getContext();
+  const ctx = getAudioContext();
   let buffer = buffers.get(src);
 
   if (!buffer) {
     try {
-      buffer = await loadBuffer(src);
+      buffer = await loadAudioBuffer(src);
     } catch {
       return false;
     }

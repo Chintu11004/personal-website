@@ -3,15 +3,18 @@ import { Canvas } from '@react-three/fiber';
 import { Scene } from './three/Scene';
 import XMBNav from './components/XMBNav';
 import Clock from './components/Clock';
+import LauncherMusic from './components/LauncherMusic';
 import ProfileTrigger from './components/ProfileTrigger';
 import './App.css';
 import { navItems } from './three/navItems';
 import { NAV_CANCEL_AUDIO, NAV_DECIDE_AUDIO, STARTUP_AUDIO, STARTUP_AUDIO_VOLUME } from './three/introConfig';
+import { collectLauncherMusicUrls } from './three/utils/collectLauncherMusicUrls';
 import { preloadNavTextures } from './three/utils/preloadNavTextures';
 import { createPointerNavHandlers } from './three/utils/pointerNav';
 import { playUiSound, preloadUiSound, unlockUiAudio } from './utils/uiSound';
 
-const BOOT_SOUNDS = [STARTUP_AUDIO, NAV_DECIDE_AUDIO, NAV_CANCEL_AUDIO];
+const LAUNCHER_MUSIC = [...collectLauncherMusicUrls(navItems)];
+const BOOT_SOUNDS = [STARTUP_AUDIO, NAV_DECIDE_AUDIO, NAV_CANCEL_AUDIO, ...LAUNCHER_MUSIC];
 
 preloadUiSound(STARTUP_AUDIO);
 preloadNavTextures();
@@ -23,6 +26,7 @@ function App() {
   const focusSubRowRef = useRef({ values: navItems.map(() => 0) });
   const navDepthRef = useRef({ value: 0 });
   const contentPanelVisibleRef = useRef({ value: 0 });
+  const contentPanelOpenRef = useRef({ value: false });
   const fullscreenPanelVisibleRef = useRef({ value: 0 });
   const profilePanelVisibleRef = useRef({ value: 0 });
   const fullscreenOpenRef = useRef(false);
@@ -122,6 +126,7 @@ function App() {
           focusSubRowRef={focusSubRowRef}
           navDepthRef={navDepthRef}
           contentPanelVisibleRef={contentPanelVisibleRef}
+          contentPanelOpenRef={contentPanelOpenRef}
           fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
           profilePanelVisibleRef={profilePanelVisibleRef}
           fullscreenOpenRef={fullscreenOpenRef}
@@ -162,6 +167,13 @@ function App() {
         fullscreenPanelVisibleRef={fullscreenPanelVisibleRef}
         profilePanelVisibleRef={profilePanelVisibleRef}
         introUiOpacityRef={introUiOpacityRef}
+      />
+      <LauncherMusic
+        focusColRef={focusColRef}
+        focusSubRowRef={focusSubRowRef}
+        contentPanelVisibleRef={contentPanelVisibleRef}
+        contentPanelOpenRef={contentPanelOpenRef}
+        introCompleteRef={introCompleteRef}
       />
       <ProfileTrigger
         contentPanelVisibleRef={contentPanelVisibleRef}
